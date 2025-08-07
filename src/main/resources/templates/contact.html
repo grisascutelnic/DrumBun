@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - Faina</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Bara de navigare -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-car"></i>
+                <span>Faina</span>
+            </div>
+            <div class="nav-menu">
+                <a href="/" class="nav-link">Acasă</a>
+                <a href="/rides" class="nav-link">Călătorii</a>
+                <a href="/about" class="nav-link">Despre</a>
+                <a href="/contact" class="nav-link active">Contact</a>
+            </div>
+            <div class="nav-auth">
+                <button class="btn-login">Conectare</button>
+                <button class="btn-register">Înregistrare</button>
+            </div>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Conținut principal -->
+    <main class="contact-container">
+        <div class="contact-header">
+            <h1>Contactează-ne</h1>
+            <p>Suntem aici să te ajutăm cu orice întrebare ai avea</p>
+        </div>
+
+        <div class="contact-content">
+            <div class="contact-info">
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h3>Email</h3>
+                    <p>contact@faina.ro</p>
+                    <p>support@faina.ro</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <h3>Telefon</h3>
+                    <p>+40 123 456 789</p>
+                    <p>Luni-Vineri: 9:00-18:00</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h3>Adresă</h3>
+                    <p>Strada Exemplu, Nr. 123</p>
+                    <p>București, România</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>Program</h3>
+                    <p>Luni-Vineri: 9:00-18:00</p>
+                    <p>Sâmbătă: 10:00-14:00</p>
+                </div>
+            </div>
+
+            <div class="contact-form-section">
+                <h2>Trimite-ne un mesaj</h2>
+                <form class="contact-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="first-name">Prenume</label>
+                            <input type="text" id="first-name" name="firstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="last-name">Nume</label>
+                            <input type="text" id="last-name" name="lastName" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="subject">Subiect</label>
+                        <select id="subject" name="subject" required>
+                            <option value="">Selectează un subiect</option>
+                            <option value="general">Întrebare generală</option>
+                            <option value="support">Suport tehnic</option>
+                            <option value="partnership">Parteneriat</option>
+                            <option value="feedback">Feedback</option>
+                            <option value="other">Altceva</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Mesaj</label>
+                        <textarea id="message" name="message" rows="6" placeholder="Scrie-ne mesajul tău aici..." required></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-paper-plane"></i>
+                        Trimite mesaj
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="faq-section">
+            <h2>Întrebări Frecvente</h2>
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Cum pot înregistra o cursă?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Pentru a înregistra o cursă, trebuie să te conectezi la contul tău și să accesezi secțiunea "Adaugă cursă". Acolo vei putea completa toate detaliile necesare.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Cum funcționează sistemul de plăți?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Plățile se fac prin platforma noastră sigură. Poți plăti cu card bancar sau prin transfer bancar. Banii sunt transferați șoferului doar după ce călătoria s-a terminat cu succes.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Ce se întâmplă dacă cursă este anulată?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Dacă o cursă este anulată cu cel puțin 24 de ore înainte, vei primi o rambursare completă. Pentru anulări mai târzii, se aplică politica noastră de rambursare.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Cum pot raporta o problemă?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Poți raporta orice problemă prin formularul de contact de mai sus sau prin email la support@faina.ro. Echipa noastră va răspunde în cel mai scurt timp.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Faina</h3>
+                <p>Conectăm oamenii prin călătorii împărtășite</p>
+            </div>
+            <div class="footer-section">
+                <h4>Link-uri utile</h4>
+                <a href="/about">Despre noi</a>
+                <a href="#">Termeni și condiții</a>
+                <a href="#">Politica de confidențialitate</a>
+            </div>
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <a href="mailto:contact@faina.ro">contact@faina.ro</a>
+                <a href="tel:+40123456789">+40 123 456 789</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Faina. Toate drepturile rezervate.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

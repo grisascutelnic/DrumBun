@@ -1,0 +1,635 @@
+// Variabile globale pentru harta și autocomplete
+let map;
+let fromMarker, toMarker;
+let routeLayer;
+let currentFormData = {};
+
+// Inițializare când se încarcă pagina
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Add-ride page loaded, initializing...');
+    
+    try {
+        initializeMap();
+        console.log('Map initialized');
+    } catch (error) {
+        console.error('Error initializing map:', error);
+    }
+    
+    try {
+        initializeLocationAutocomplete();
+        console.log('Autocomplete initialized');
+    } catch (error) {
+        console.error('Error initializing autocomplete:', error);
+    }
+    
+    try {
+        initializeFormHandlers();
+        console.log('Form handlers initialized');
+    } catch (error) {
+        console.error('Error initializing form handlers:', error);
+    }
+    
+    try {
+        setDefaultDate();
+        console.log('Default date set');
+    } catch (error) {
+        console.error('Error setting default date:', error);
+    }
+});
+
+// Inițializarea hărții
+function initializeMap() {
+    const mapElement = document.getElementById('route-map');
+    if (!mapElement) {
+        console.error('Map element not found');
+        return;
+    }
+    
+    // Centrul hărții pe Moldova
+    map = L.map('route-map').setView([47.0105, 28.8638], 8);
+    
+    // Adăugăm layer-ul OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    
+    // Inițializăm controalele hărții
+    initializeMapControls();
+}
+
+// Inițializarea controalelor hărții
+function initializeMapControls() {
+    const calculateRouteBtn = document.getElementById('calculate-route');
+    const clearRouteBtn = document.getElementById('clear-route');
+    
+    if (calculateRouteBtn) {
+        calculateRouteBtn.addEventListener('click', calculateRoute);
+        console.log('Calculate route button handler added');
+    }
+    
+    if (clearRouteBtn) {
+        clearRouteBtn.addEventListener('click', clearRoute);
+        console.log('Clear route button handler added');
+    }
+}
+
+// Inițializarea autocomplete pentru localități
+function initializeLocationAutocomplete() {
+    const fromInput = document.getElementById('from-location');
+    const toInput = document.getElementById('to-location');
+    
+    console.log('From input found:', !!fromInput);
+    console.log('To input found:', !!toInput);
+    
+    if (fromInput) {
+        setupAutocomplete(fromInput, 'from-suggestions', 'from');
+        console.log('From autocomplete setup complete');
+    }
+    
+    if (toInput) {
+        setupAutocomplete(toInput, 'to-suggestions', 'to');
+        console.log('To autocomplete setup complete');
+    }
+}
+
+// Configurarea autocomplete pentru un input
+function setupAutocomplete(input, suggestionsId, type) {
+    let timeoutId;
+    let selectedIndex = -1;
+    const suggestionsContainer = document.getElementById(suggestionsId);
+    
+    console.log(`Setting up autocomplete for ${type}, container:`, !!suggestionsContainer);
+    
+    input.addEventListener('input', function() {
+        clearTimeout(timeoutId);
+        const query = this.value.trim();
+        
+        console.log(`${type} input changed:`, query);
+        
+        if (query.length < 2) {
+            hideSuggestions(suggestionsContainer);
+            return;
+        }
+        
+        timeoutId = setTimeout(() => {
+            searchLocations(query, suggestionsContainer, type);
+        }, 300);
+    });
+    
+    input.addEventListener('keydown', function(e) {
+        const suggestions = suggestionsContainer.querySelectorAll('.suggestion-item');
+        
+        switch(e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                selectedIndex = Math.min(selectedIndex + 1, suggestions.length - 1);
+                updateSelection(suggestions, selectedIndex);
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                selectedIndex = Math.max(selectedIndex - 1, -1);
+                updateSelection(suggestions, selectedIndex);
+                break;
+            case 'Enter':
+                e.preventDefault();
+                if (selectedIndex >= 0 && suggestions[selectedIndex]) {
+                    selectSuggestion(suggestions[selectedIndex], input, type);
+                }
+                break;
+            case 'Escape':
+                hideSuggestions(suggestionsContainer);
+                break;
+        }
+    });
+    
+    // Click pe sugestii
+    suggestionsContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('suggestion-item')) {
+            selectSuggestion(e.target, input, type);
+        }
+    });
+    
+    // Închiderea sugestiilor când se face click în altă parte
+    document.addEventListener('click', function(e) {
+        if (!input.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+            hideSuggestions(suggestionsContainer);
+        }
+    });
+}
+
+// Căutarea localităților folosind Nominatim
+async function searchLocations(query, container, type) {
+    console.log(`Searching for: ${query} (${type})`);
+    
+    try {
+        // Căutăm în Moldova cu Nominatim
+        const searchQuery = `${query}, Moldova`;
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&countrycodes=md&limit=15&addressdetails=1`;
+        
+        console.log('Fetching from Nominatim:', url);
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        console.log('Nominatim results:', data.length);
+        
+        // Procesăm rezultatele
+        const processedResults = data.map(item => {
+            const displayName = formatDisplayName(item);
+            const locationType = getLocationType(item);
+            
+            return {
+                name: displayName,
+                lat: item.lat,
+                lon: item.lon,
+                type: locationType,
+                fullAddress: item.display_name
+            };
+        });
+        
+        displaySuggestions(processedResults, container, type);
+    } catch (error) {
+        console.error('Eroare la căutarea localităților:', error);
+        showNotification('Eroare la căutarea localităților. Vă rugăm să încercați din nou.', 'error');
+        hideSuggestions(container);
+    }
+}
+
+// Formatarea numelui pentru afișare
+function formatDisplayName(item) {
+    const address = item.address || {};
+    
+    // Încercăm să găsim cel mai specific nume
+    if (address.city) return address.city;
+    if (address.town) return address.town;
+    if (address.village) return address.village;
+    if (address.hamlet) return address.hamlet;
+    if (address.suburb) return address.suburb;
+    if (address.neighbourhood) return address.neighbourhood;
+    
+    // Dacă nu găsim, folosim primul element din display_name
+    const parts = item.display_name.split(',');
+    return parts[0].trim();
+}
+
+// Determinarea tipului de locație
+function getLocationType(item) {
+    const address = item.address || {};
+    
+    if (address.aerodrome || address.airport) return 'airport';
+    if (address.railway_station || address.station) return 'station';
+    if (address.city || address.town) return 'city';
+    if (address.village || address.hamlet) return 'village';
+    if (address.suburb || address.neighbourhood) return 'district';
+    
+    return 'location';
+}
+
+// Afișarea sugestiilor
+function displaySuggestions(results, container, type) {
+    console.log(`Displaying ${results.length} suggestions for ${type}`);
+    
+    if (!results || results.length === 0) {
+        hideSuggestions(container);
+        return;
+    }
+    
+    let html = '';
+    results.forEach((result, index) => {
+        const displayName = result.name;
+        const iconClass = getLocationIcon(result.type);
+        const typeLabel = getLocationTypeLabel(result.type);
+        
+        html += `
+            <div class="suggestion-item" data-index="${index}" data-lat="${result.lat}" data-lon="${result.lon}">
+                <i class="${iconClass}"></i>
+                <div class="suggestion-content">
+                    <span class="suggestion-name">${displayName}</span>
+                    <small class="suggestion-address">${result.fullAddress}</small>
+                </div>
+                <small class="suggestion-type">${typeLabel}</small>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+    container.style.display = 'block';
+    console.log(`Displayed ${results.length} suggestions`);
+}
+
+// Obținerea iconiței pentru tipul de locație
+function getLocationIcon(type) {
+    switch(type) {
+        case 'city': return 'fas fa-city';
+        case 'village': return 'fas fa-home';
+        case 'airport': return 'fas fa-plane';
+        case 'station': return 'fas fa-train';
+        case 'district': return 'fas fa-map-marker-alt';
+        default: return 'fas fa-map-marker-alt';
+    }
+}
+
+// Obținerea etichetei pentru tipul de locație
+function getLocationTypeLabel(type) {
+    switch(type) {
+        case 'city': return 'Oraș';
+        case 'village': return 'Sat';
+        case 'airport': return 'Aeroport';
+        case 'station': return 'Gară';
+        case 'district': return 'Cartier';
+        default: return 'Locație';
+    }
+}
+
+// Actualizarea selecției cu săgețile
+function updateSelection(suggestions, selectedIndex) {
+    suggestions.forEach((item, index) => {
+        if (index === selectedIndex) {
+            item.classList.add('selected');
+        } else {
+            item.classList.remove('selected');
+        }
+    });
+}
+
+// Selectarea unei sugestii
+function selectSuggestion(suggestionItem, input, type) {
+    const displayName = suggestionItem.querySelector('.suggestion-name').textContent;
+    const fullAddress = suggestionItem.querySelector('.suggestion-address').textContent;
+    
+    // Afișăm numele principal în input
+    input.value = displayName;
+    
+    // Adăugăm un atribut cu adresa completă pentru referință
+    input.setAttribute('data-full-address', fullAddress);
+    
+    hideSuggestions(document.getElementById(`${type}-suggestions`));
+    
+    // Adăugăm marker pe hartă dacă avem coordonatele
+    const lat = suggestionItem.dataset.lat;
+    const lon = suggestionItem.dataset.lon;
+    if (lat && lon) {
+        addMarkerToMap(lat, lon, displayName, type);
+    }
+}
+
+// Adăugarea unui marker pe hartă
+function addMarkerToMap(lat, lon, name, type) {
+    const marker = L.marker([lat, lon]).addTo(map);
+    
+    if (type === 'from') {
+        if (fromMarker) map.removeLayer(fromMarker);
+        fromMarker = marker;
+        marker.setIcon(L.divIcon({
+            className: 'custom-marker from-marker',
+            html: '<i class="fas fa-map-marker-alt" style="color: #3b82f6;"></i>',
+            iconSize: [30, 30]
+        }));
+    } else {
+        if (toMarker) map.removeLayer(toMarker);
+        toMarker = marker;
+        marker.setIcon(L.divIcon({
+            className: 'custom-marker to-marker',
+            html: '<i class="fas fa-map-marker-alt" style="color: #ef4444;"></i>',
+            iconSize: [30, 30]
+        }));
+    }
+    
+    marker.bindPopup(`<b>${name}</b>`);
+    
+    // Centrăm harta pe ambele markeri dacă există
+    if (fromMarker && toMarker) {
+        const group = L.featureGroup([fromMarker, toMarker]);
+        map.fitBounds(group.getBounds().pad(0.1));
+    }
+}
+
+// Ascunderea sugestiilor
+function hideSuggestions(container) {
+    if (container) {
+        container.style.display = 'none';
+    }
+}
+
+// Funcția pentru afișarea notificărilor
+function showNotification(message, type = 'info') {
+    // Ștergem notificările existente
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(notification => notification.remove());
+    
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    
+    const iconMap = {
+        success: 'fas fa-check-circle',
+        error: 'fas fa-exclamation-circle',
+        warning: 'fas fa-exclamation-triangle',
+        info: 'fas fa-info-circle'
+    };
+    
+    notification.innerHTML = `
+        <div class="notification-content ${type}">
+            <i class="${iconMap[type] || iconMap.info}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Ștergem notificarea după 5 secunde
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Calcularea rutei
+async function calculateRoute() {
+    if (!fromMarker || !toMarker) {
+        showNotification('Vă rugăm să selectați atât punctul de plecare cât și cel de destinație.', 'warning');
+        return;
+    }
+    
+    const fromLat = fromMarker.getLatLng().lat;
+    const fromLon = fromMarker.getLatLng().lng;
+    const toLat = toMarker.getLatLng().lat;
+    const toLon = toMarker.getLatLng().lng;
+    
+    try {
+        // Folosim OSRM pentru calculul rutei
+        const url = `https://router.project-osrm.org/route/v1/driving/${fromLon},${fromLat};${toLon},${toLat}?overview=full&geometries=geojson`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.routes && data.routes.length > 0) {
+            displayRoute(data.routes[0]);
+            showNotification('Ruta a fost calculată cu succes!', 'success');
+        } else {
+            showNotification('Nu s-a putut calcula ruta. Vă rugăm să încercați din nou.', 'error');
+        }
+    } catch (error) {
+        console.error('Eroare la calcularea rutei:', error);
+        showNotification('Eroare la calcularea rutei. Vă rugăm să încercați din nou.', 'error');
+    }
+}
+
+// Afișarea rutei pe hartă
+function displayRoute(route) {
+    // Ștergem ruta anterioară
+    if (routeLayer) {
+        map.removeLayer(routeLayer);
+    }
+    
+    // Adăugăm noua rută
+    routeLayer = L.geoJSON(route.geometry, {
+        style: {
+            color: '#10b981',
+            weight: 4,
+            opacity: 0.8
+        }
+    }).addTo(map);
+    
+    // Centrăm harta pe rută
+    map.fitBounds(routeLayer.getBounds().pad(0.1));
+}
+
+// Ștergerea rutei
+function clearRoute() {
+    if (routeLayer) {
+        map.removeLayer(routeLayer);
+        routeLayer = null;
+    }
+    
+    if (fromMarker) {
+        map.removeLayer(fromMarker);
+        fromMarker = null;
+    }
+    
+    if (toMarker) {
+        map.removeLayer(toMarker);
+        toMarker = null;
+    }
+    
+    // Resetăm input-urile
+    document.getElementById('from-location').value = '';
+    document.getElementById('to-location').value = '';
+    
+    showNotification('Ruta a fost ștearsă.', 'info');
+}
+
+// Inițializarea handler-elor pentru formular
+function initializeFormHandlers() {
+    const form = document.getElementById('add-ride-form');
+    const previewBtn = document.getElementById('preview-ride');
+    
+    if (form) {
+        form.addEventListener('submit', handleFormSubmit);
+    }
+    
+    if (previewBtn) {
+        previewBtn.addEventListener('click', showPreview);
+    }
+}
+
+// Handler pentru submit-ul formularului
+function handleFormSubmit(e) {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+        return;
+    }
+    
+    const formData = new FormData(e.target);
+    submitRideData(formData);
+}
+
+// Validarea formularului
+function validateForm() {
+    const requiredFields = ['fromLocation', 'toLocation', 'travelDate', 'departureTime', 'availableSeats', 'price', 'driverName', 'driverPhone'];
+    
+    for (const field of requiredFields) {
+        const element = document.querySelector(`[name="${field}"]`);
+        if (!element || !element.value.trim()) {
+            showNotification(`Câmpul "${element?.placeholder || field}" este obligatoriu.`, 'error');
+            return false;
+        }
+    }
+    
+    // Validare preț
+    const price = parseFloat(document.getElementById('price').value);
+    if (price <= 0) {
+        showNotification('Prețul trebuie să fie mai mare decât 0.', 'error');
+        return false;
+    }
+    
+    // Validare locuri disponibile
+    const seats = parseInt(document.getElementById('available-seats').value);
+    if (seats < 1 || seats > 8) {
+        showNotification('Numărul de locuri disponibile trebuie să fie între 1 și 8.', 'error');
+        return false;
+    }
+    
+    return true;
+}
+
+// Trimiterea datelor cursei
+async function submitRideData(formData) {
+    try {
+        const response = await fetch('/api/rides', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(data.message, 'success');
+            setTimeout(() => {
+                window.location.href = '/rides';
+            }, 2000);
+        } else {
+            showNotification(data.message, 'error');
+        }
+    } catch (error) {
+        console.error('Eroare la trimiterea datelor:', error);
+        showNotification('Eroare la trimiterea datelor. Vă rugăm să încercați din nou.', 'error');
+    }
+}
+
+// Afișarea previzualizării
+function showPreview() {
+    if (!validateForm()) {
+        return;
+    }
+    
+    const formData = new FormData(document.getElementById('add-ride-form'));
+    currentFormData = Object.fromEntries(formData);
+    
+    const previewContent = document.getElementById('preview-content');
+    previewContent.innerHTML = generatePreviewHTML(currentFormData);
+    
+    document.getElementById('preview-modal').style.display = 'block';
+}
+
+// Generarea HTML-ului pentru previzualizare
+function generatePreviewHTML(data) {
+    return `
+        <div class="preview-ride">
+            <div class="preview-section">
+                <h4><i class="fas fa-route"></i> Ruta</h4>
+                <p><strong>De la:</strong> ${data.fromLocation}</p>
+                <p><strong>Până la:</strong> ${data.toLocation}</p>
+            </div>
+            
+            <div class="preview-section">
+                <h4><i class="fas fa-calendar"></i> Detalii Călătorie</h4>
+                <p><strong>Data:</strong> ${data.travelDate}</p>
+                <p><strong>Ora plecării:</strong> ${data.departureTime}</p>
+                <p><strong>Locuri disponibile:</strong> ${data.availableSeats}</p>
+                <p><strong>Preț per loc:</strong> ${data.price} RON</p>
+            </div>
+            
+            <div class="preview-section">
+                <h4><i class="fas fa-user"></i> Șofer</h4>
+                <p><strong>Nume:</strong> ${data.driverName}</p>
+                <p><strong>Telefon:</strong> ${data.driverPhone}</p>
+            </div>
+            
+            ${data.description ? `
+                <div class="preview-section">
+                    <h4><i class="fas fa-info-circle"></i> Descriere</h4>
+                    <p>${data.description}</p>
+                </div>
+            ` : ''}
+        </div>
+    `;
+}
+
+// Închiderea modalului
+function closeModal() {
+    document.getElementById('preview-modal').style.display = 'none';
+}
+
+// Submit-ul din modal
+function submitRide() {
+    if (Object.keys(currentFormData).length === 0) {
+        showNotification('Nu există date pentru trimitere.', 'error');
+        return;
+    }
+    
+    const formData = new FormData();
+    Object.entries(currentFormData).forEach(([key, value]) => {
+        formData.append(key, value);
+    });
+    
+    submitRideData(formData);
+    closeModal();
+}
+
+// Setarea datei implicite (mâine)
+function setDefaultDate() {
+    const travelDate = document.getElementById('travel-date');
+    if (travelDate) {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const formattedDate = tomorrow.toISOString().split('T')[0];
+        travelDate.value = formattedDate;
+    }
+}
+
+// Închiderea modalului când se face click în afară
+window.addEventListener('click', function(e) {
+    const modal = document.getElementById('preview-modal');
+    if (e.target === modal) {
+        closeModal();
+    }
+});
+
+// Închiderea modalului cu ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeModal();
+    }
+});

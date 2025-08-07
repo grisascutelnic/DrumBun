@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ro" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faina - Călătorii Împărtășite</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Include Navigation -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <!-- Hero Section cu formularul de căutare -->
+    <main class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Găsește călătoria perfectă</h1>
+            <p class="hero-subtitle">Conectează-te cu șoferi și călători din întreaga Românie</p>
+            
+            <!-- Formularul de căutare -->
+            <div class="search-container">
+                <div class="search-form">
+                    <!-- De la -->
+                    <div class="form-group">
+                        <label for="from-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            De la
+                        </label>
+                        <div class="location-input-container">
+                            <input type="text" id="from-location" placeholder="Introduceți localitatea de plecare">
+                            <div id="from-suggestions" class="suggestions-dropdown"></div>
+                        </div>
+                    </div>
+
+                    <!-- Până la -->
+                    <div class="form-group">
+                        <label for="to-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            Până la
+                        </label>
+                        <div class="location-input-container">
+                            <input type="text" id="to-location" placeholder="Introduceți localitatea de destinație">
+                            <div id="to-suggestions" class="suggestions-dropdown"></div>
+                        </div>
+                    </div>
+
+                    <!-- Data călătoriei -->
+                    <div class="form-group">
+                        <label for="travel-date">
+                            <i class="fas fa-calendar-alt"></i>
+                            Data călătoriei
+                        </label>
+                        <input type="date" id="travel-date">
+                    </div>
+
+                    <!-- Pasageri și Colete -->
+                    <div class="form-group passengers-luggage">
+                        <div class="passenger-section">
+                            <label>
+                                <i class="fas fa-users"></i>
+                                Pasageri
+                            </label>
+                            <div class="counter">
+                                <button class="counter-btn minus" data-type="passengers">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <span class="counter-value" id="passengers-count">1</span>
+                                <button class="counter-btn plus" data-type="passengers">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="luggage-section">
+                            <label>
+                                <i class="fas fa-suitcase"></i>
+                                Colete
+                            </label>
+                            <div class="counter">
+                                <button class="counter-btn minus" data-type="luggage">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <span class="counter-value" id="luggage-count">0</span>
+                                <button class="counter-btn plus" data-type="luggage">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Butonul de căutare -->
+                    <button class="search-btn">
+                        <i class="fas fa-search"></i>
+                        Caută călătorii
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Butonul pentru adăugarea unei curse noi -->
+    <div class="add-ride-container">
+        <button class="add-ride-btn">
+            <i class="fas fa-plus"></i>
+            Adaugă o cursă nouă
+        </button>
+    </div>
+
+    <!-- Include Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>

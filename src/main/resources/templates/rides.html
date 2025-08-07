@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ro" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Călătorii Disponibile - Faina</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Include Navigation -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <!-- Conținut principal -->
+    <main class="rides-container">
+        <div class="rides-header">
+            <h1>Călătorii Disponibile</h1>
+            <p>Găsește călătoria perfectă pentru tine</p>
+        </div>
+
+        <!-- Filtre -->
+        <div class="filters-section">
+            <div class="filter-group">
+                <label for="filter-from">De la:</label>
+                <div class="location-input-container">
+                    <input type="text" id="filter-from" placeholder="Orice localitate">
+                    <div id="filter-from-suggestions" class="suggestions-dropdown"></div>
+                </div>
+            </div>
+            <div class="filter-group">
+                <label for="filter-to">Până la:</label>
+                <div class="location-input-container">
+                    <input type="text" id="filter-to" placeholder="Orice localitate">
+                    <div id="filter-to-suggestions" class="suggestions-dropdown"></div>
+                </div>
+            </div>
+            <div class="filter-group">
+                <label for="filter-date">Data:</label>
+                <input type="date" id="filter-date">
+            </div>
+            <button class="filter-btn">
+                <i class="fas fa-filter"></i>
+                Filtrează
+            </button>
+        </div>
+
+        <!-- Lista de curse -->
+        <div class="rides-list">
+            <!-- Cursa 1 -->
+            <div class="ride-card">
+                <div class="ride-header">
+                    <div class="ride-route">
+                        <div class="route-point">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>București</span>
+                        </div>
+                        <div class="route-arrow">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                        <div class="route-point">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Cluj-Napoca</span>
+                        </div>
+                    </div>
+                    <div class="ride-price">
+                        <span class="price">50 RON</span>
+                        <span class="per-seat">per loc</span>
+                    </div>
+                </div>
+                <div class="ride-details">
+                    <div class="ride-info">
+                        <div class="info-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>15 Aug 2024</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-clock"></i>
+                            <span>14:30</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-users"></i>
+                            <span>3 locuri disponibile</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-user"></i>
+                            <span>Ion Popescu</span>
+                        </div>
+                    </div>
+                    <div class="ride-actions">
+                        <button class="btn-reserve">
+                            <i class="fas fa-ticket-alt"></i>
+                            Rezervă
+                        </button>
+                        <button class="btn-details">
+                            <i class="fas fa-info-circle"></i>
+                            Detalii
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cursa 2 -->
+            <div class="ride-card">
+                <div class="ride-header">
+                    <div class="ride-route">
+                        <div class="route-point">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Iași</span>
+                        </div>
+                        <div class="route-arrow">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                        <div class="route-point">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>București</span>
+                        </div>
+                    </div>
+                    <div class="ride-price">
+                        <span class="price">35 RON</span>
+                        <span class="per-seat">per loc</span>
+                    </div>
+                </div>
+                <div class="ride-details">
+                    <div class="ride-info">
+                        <div class="info-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>16 Aug 2024</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-clock"></i>
+                            <span>09:00</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-users"></i>
+                            <span>2 locuri disponibile</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-user"></i>
+                            <span>Maria Ionescu</span>
+                        </div>
+                    </div>
+                    <div class="ride-actions">
+                        <button class="btn-reserve">
+                            <i class="fas fa-ticket-alt"></i>
+                            Rezervă
+                        </button>
+                        <button class="btn-details">
+                            <i class="fas fa-info-circle"></i>
+                            Detalii
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cursa 3 -->
+            <div class="ride-card">
+                <div class="ride-header">
+                    <div class="ride-route">
+                        <div class="route-point">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Timișoara</span>
+                        </div>
+                        <div class="route-arrow">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                        <div class="route-point">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Cluj-Napoca</span>
+                        </div>
+                    </div>
+                    <div class="ride-price">
+                        <span class="price">45 RON</span>
+                        <span class="per-seat">per loc</span>
+                    </div>
+                </div>
+                <div class="ride-details">
+                    <div class="ride-info">
+                        <div class="info-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>17 Aug 2024</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-clock"></i>
+                            <span>16:00</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-users"></i>
+                            <span>4 locuri disponibile</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-user"></i>
+                            <span>Alexandru Dumitrescu</span>
+                        </div>
+                    </div>
+                    <div class="ride-actions">
+                        <button class="btn-reserve">
+                            <i class="fas fa-ticket-alt"></i>
+                            Rezervă
+                        </button>
+                        <button class="btn-details">
+                            <i class="fas fa-info-circle"></i>
+                            Detalii
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paginare -->
+        <div class="pagination">
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </main>
+
+    <!-- Include Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
