@@ -35,9 +35,22 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 if (data.success) {
                     showNotification(data.message, 'success');
-                    // Redirect to home page after successful login
+                    // Update navbar for logged in user
+                    if (typeof checkAuthStatus === 'function') {
+                        checkAuthStatus();
+                    }
+                    
+                    // Check for redirect parameter
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const redirectTo = urlParams.get('redirect');
+                    
+                    // Redirect after successful login
                     setTimeout(() => {
-                        window.location.href = '/';
+                        if (redirectTo) {
+                            window.location.href = redirectTo;
+                        } else {
+                            window.location.href = '/';
+                        }
                     }, 1500);
                 } else {
                     showNotification(data.message, 'error');

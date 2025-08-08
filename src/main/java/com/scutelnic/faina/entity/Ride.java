@@ -39,11 +39,9 @@ public class Ride {
     @Column(length = 1000)
     private String description;
     
-    @Column(nullable = false)
-    private String driverName;
-    
-    @Column(nullable = false)
-    private String driverPhone;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
     
     @Column(nullable = false)
     private LocalDateTime createdAt;

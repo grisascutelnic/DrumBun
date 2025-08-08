@@ -18,7 +18,10 @@ public class RideDTO {
     private Integer availableSeats;
     private BigDecimal price;
     private String description;
+    private Long userId;
     private String driverName;
     private String driverPhone;
+    private String driverEmail;
+    private String driverProfileImage;
     private LocalDateTime createdAt;
 }

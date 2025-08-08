@@ -32,6 +32,9 @@ public class User {
     @Column(nullable = false)
     private String phone;
     
+    @Column
+    private String profileImage;
+    
     @Column(nullable = false)
     private LocalDateTime createdAt;
     

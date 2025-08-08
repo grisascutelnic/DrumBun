@@ -4,9 +4,11 @@ import com.scutelnic.faina.service.RideService;
 import com.scutelnic.faina.dto.RideDTO;
 import com.scutelnic.faina.dto.SearchRideRequest;
 import com.scutelnic.faina.dto.AddRideRequest;
+import com.scutelnic.faina.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpSession;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -77,10 +79,18 @@ public class RideController {
             @RequestParam int availableSeats,
             @RequestParam double price,
             @RequestParam String description,
-            @RequestParam String driverName,
-            @RequestParam String driverPhone) {
+            HttpSession session) {
         
         try {
+            // Verificăm dacă utilizatorul este logat
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Trebuie să fiți logat pentru a adăuga o cursă.");
+                return ResponseEntity.status(401).body(response);
+            }
+            
             AddRideRequest request = new AddRideRequest();
             request.setFromLocation(fromLocation);
             request.setToLocation(toLocation);
@@ -89,10 +99,8 @@ public class RideController {
             request.setAvailableSeats(availableSeats);
             request.setPrice(java.math.BigDecimal.valueOf(price));
             request.setDescription(description);
-            request.setDriverName(driverName);
-            request.setDriverPhone(driverPhone);
             
-            RideDTO savedRide = rideService.addRide(request);
+            RideDTO savedRide = rideService.addRide(request, user);
             
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
@@ -118,5 +126,21 @@ public class RideController {
     public ResponseEntity<List<String>> getAllToLocations() {
         List<String> locations = rideService.getAllToLocations();
         return ResponseEntity.ok(locations);
+    }
+    
+    @GetMapping("/my-rides")
+    public ResponseEntity<List<RideDTO>> getMyRides(HttpSession session) {
+        try {
+            // Verificăm dacă utilizatorul este logat
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                return ResponseEntity.status(401).build();
+            }
+            
+            List<RideDTO> rides = rideService.getRidesByUser(user);
+            return ResponseEntity.ok(rides);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

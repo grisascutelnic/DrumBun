@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ro" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil - DrumBun</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Include Navigation -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Profile Header Section -->
+            <div class="profile-hero">
+                <div class="profile-cover">
+                    <div class="profile-avatar-large">
+                        <img id="profile-image" src="" alt="Imagine de profil" style="display: none;">
+                        <i class="fas fa-user-circle" id="default-avatar"></i>
+                    </div>
+                    <div class="profile-info-header">
+                        <h1 id="user-name">Se încarcă...</h1>
+                        <p id="user-email">Se încarcă...</p>
+                        <div class="profile-stats-header">
+                            <div class="stat-item-header">
+                                <span class="stat-number-header" id="total-rides-header">0</span>
+                                <span class="stat-label-header">Călătorii create</span>
+                            </div>
+                            <div class="stat-item-header">
+                                <span class="stat-number-header" id="completed-rides-header">0</span>
+                                <span class="stat-label-header">Călătorii completate</span>
+                            </div>
+                            <div class="stat-item-header">
+                                <span class="stat-number-header" id="member-since-header">-</span>
+                                <span class="stat-label-header">Membru din</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Content -->
+            <div class="profile-content-wrapper">
+                <div class="profile-sidebar">
+                    <!-- Personal Information -->
+                    <div class="profile-section-card">
+                        <h3><i class="fas fa-user"></i> Informații personale</h3>
+                        <div class="info-list">
+                            <div class="info-item">
+                                <label>Nume complet:</label>
+                                <span id="full-name">Se încarcă...</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Email:</label>
+                                <span id="email">Se încarcă...</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Telefon:</label>
+                                <span id="phone">Se încarcă...</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Membru din:</label>
+                                <span id="created-at">Se încarcă...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="profile-section-card">
+                        <h3><i class="fas fa-cog"></i> Acțiuni rapide</h3>
+                        <div class="quick-actions">
+                            <button class="btn-secondary btn-full" id="edit-profile-btn">
+                                <i class="fas fa-edit"></i>
+                                Editează profilul
+                            </button>
+                            <button class="btn-primary btn-full" id="add-ride-btn">
+                                <i class="fas fa-plus"></i>
+                                Adaugă o cursă
+                            </button>
+                            <button class="btn-danger btn-full" id="logout-btn">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Deconectare
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-main">
+                    <!-- User's Rides Section -->
+                    <div class="profile-section-card">
+                        <div class="section-header">
+                            <h3><i class="fas fa-car"></i> Călătoriile mele</h3>
+                            <div class="section-tabs">
+                                <button class="tab-btn active" data-tab="active">Active</button>
+                                <button class="tab-btn" data-tab="completed">Completate</button>
+                            </div>
+                        </div>
+                        
+                        <div class="rides-container" id="user-rides-container">
+                            <div class="loading-spinner" id="rides-loading">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Se încarcă călătoriile...</p>
+                            </div>
+                            <div class="user-rides-list" id="user-rides-list" style="display: none;">
+                                <!-- Rides will be loaded here -->
+                            </div>
+                            <div class="no-rides" id="no-rides" style="display: none;">
+                                <i class="fas fa-car"></i>
+                                <h3>Nu ai încă călătorii</h3>
+                                <p>Începe să creezi călătorii pentru a le vedea aici</p>
+                                <button class="btn-primary" onclick="window.location.href='/add-ride'">
+                                    <i class="fas fa-plus"></i>
+                                    Adaugă prima cursă
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Include Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script src="profile.js"></script>
+    <script src="navbar.js"></script>
+</body>
+</html>

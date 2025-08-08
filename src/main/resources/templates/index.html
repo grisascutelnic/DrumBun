@@ -96,21 +96,23 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Butonul pentru adăugarea unei curse noi -->
+            <div class="add-ride-container">
+                <button class="add-ride-btn" id="add-ride-btn">
+                    <i class="fas fa-plus"></i>
+                    Adaugă o cursă nouă
+                </button>
+            </div>
         </div>
     </main>
-
-    <!-- Butonul pentru adăugarea unei curse noi -->
-    <div class="add-ride-container">
-        <button class="add-ride-btn">
-            <i class="fas fa-plus"></i>
-            Adaugă o cursă nouă
-        </button>
-    </div>
 
     <!-- Include Footer -->
     <div th:replace="~{fragments/footer :: footer}"></div>
 
     <script src="script.js"></script>
     <script src="/autocomplete.js"></script>
+    <script src="navbar.js"></script>
+    <script src="index.js"></script>
 </body>
 </html>

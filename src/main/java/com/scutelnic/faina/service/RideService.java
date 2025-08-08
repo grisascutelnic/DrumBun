@@ -1,6 +1,7 @@
 package com.scutelnic.faina.service;
 
 import com.scutelnic.faina.entity.Ride;
+import com.scutelnic.faina.entity.User;
 import com.scutelnic.faina.repository.RideRepository;
 import com.scutelnic.faina.dto.RideDTO;
 import com.scutelnic.faina.dto.SearchRideRequest;
@@ -48,7 +49,7 @@ public class RideService {
                    .collect(Collectors.toList());
     }
     
-    public RideDTO addRide(AddRideRequest request) {
+    public RideDTO addRide(AddRideRequest request, User user) {
         Ride ride = new Ride();
         ride.setFromLocation(request.getFromLocation());
         ride.setToLocation(request.getToLocation());
@@ -57,8 +58,7 @@ public class RideService {
         ride.setAvailableSeats(request.getAvailableSeats());
         ride.setPrice(request.getPrice());
         ride.setDescription(request.getDescription());
-        ride.setDriverName(request.getDriverName());
-        ride.setDriverPhone(request.getDriverPhone());
+        ride.setUser(user);
         
         Ride savedRide = rideRepository.save(ride);
         return convertToDTO(savedRide);
@@ -78,7 +78,15 @@ public class RideService {
         return rideRepository.findAllToLocations();
     }
     
+    public List<RideDTO> getRidesByUser(User user) {
+        List<Ride> rides = rideRepository.findByUserOrderByCreatedAtDesc(user);
+        return rides.stream()
+                   .map(this::convertToDTO)
+                   .collect(Collectors.toList());
+    }
+    
     private RideDTO convertToDTO(Ride ride) {
+        User user = ride.getUser();
         return new RideDTO(
             ride.getId(),
             ride.getFromLocation(),
@@ -88,8 +96,11 @@ public class RideService {
             ride.getAvailableSeats(),
             ride.getPrice(),
             ride.getDescription(),
-            ride.getDriverName(),
-            ride.getDriverPhone(),
+            user.getId(),
+            user.getFirstName() + " " + user.getLastName(),
+            user.getPhone(),
+            user.getEmail(),
+            user.getProfileImage(),
             ride.getCreatedAt()
         );
     }

@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const firstName = document.getElementById('firstName').value;
             const lastName = document.getElementById('lastName').value;
             const phone = document.getElementById('phone').value;
+            const profileImage = document.getElementById('profile-image').files[0];
             
             // Basic validation
             if (!email || !password || !confirmPassword || !firstName || !lastName || !phone) {
@@ -34,27 +35,33 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Se înregistrează...';
             submitBtn.disabled = true;
             
+            // Create FormData for file upload
+            const formData = new FormData();
+            formData.append('email', email);
+            formData.append('password', password);
+            formData.append('firstName', firstName);
+            formData.append('lastName', lastName);
+            formData.append('phone', phone);
+            if (profileImage) {
+                formData.append('profileImage', profileImage);
+            }
+            
             // Make API call
             fetch('/api/auth/register', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: email,
-                    password: password,
-                    firstName: firstName,
-                    lastName: lastName,
-                    phone: phone
-                })
+                body: formData
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     showNotification(data.message, 'success');
-                    // Redirect to login page after successful registration
+                    // Update navbar for logged in user
+                    if (typeof checkAuthStatus === 'function') {
+                        checkAuthStatus();
+                    }
+                    // Redirect to home page after successful registration
                     setTimeout(() => {
-                        window.location.href = '/login';
+                        window.location.href = '/';
                     }, 1500);
                 } else {
                     showNotification(data.message, 'error');

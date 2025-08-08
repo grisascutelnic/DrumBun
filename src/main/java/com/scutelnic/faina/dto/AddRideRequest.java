@@ -14,6 +14,4 @@ public class AddRideRequest {
     private Integer availableSeats;
     private BigDecimal price;
     private String description;
-    private String driverName;
-    private String driverPhone;
 }

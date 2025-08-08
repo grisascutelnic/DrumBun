@@ -82,6 +82,7 @@ public class UserService {
         newUser.setFirstName(registerRequest.getFirstName());
         newUser.setLastName(registerRequest.getLastName());
         newUser.setPhone(registerRequest.getPhone());
+        newUser.setProfileImage(registerRequest.getProfileImage());
         
         User savedUser = userRepository.save(newUser);
         return new AuthResponse(true, "Contul a fost creat cu succes", savedUser);

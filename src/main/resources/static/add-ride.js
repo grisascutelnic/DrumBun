@@ -280,7 +280,7 @@ function handleFormSubmit(e) {
 
 // Validarea formularului
 function validateForm() {
-    const requiredFields = ['fromLocation', 'toLocation', 'travelDate', 'departureTime', 'availableSeats', 'price', 'driverName', 'driverPhone'];
+    const requiredFields = ['fromLocation', 'toLocation', 'travelDate', 'departureTime', 'availableSeats', 'price'];
     
     for (const field of requiredFields) {
         const element = document.querySelector(`[name="${field}"]`);
@@ -362,12 +362,6 @@ function generatePreviewHTML(data) {
                 <p><strong>Ora plecării:</strong> ${data.departureTime}</p>
                 <p><strong>Locuri disponibile:</strong> ${data.availableSeats}</p>
                 <p><strong>Preț per loc:</strong> ${data.price} RON</p>
-            </div>
-            
-            <div class="preview-section">
-                <h4><i class="fas fa-user"></i> Șofer</h4>
-                <p><strong>Nume:</strong> ${data.driverName}</p>
-                <p><strong>Telefon:</strong> ${data.driverPhone}</p>
             </div>
             
             ${data.description ? `

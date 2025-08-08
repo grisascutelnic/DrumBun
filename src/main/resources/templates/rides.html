@@ -39,85 +39,39 @@
                 <label for="filter-date">Data:</label>
                 <input type="date" id="filter-date">
             </div>
-            <button class="filter-btn">
+            <button class="filter-btn" id="filter-btn">
                 <i class="fas fa-filter"></i>
                 Filtrează
             </button>
         </div>
 
         <!-- Lista de curse -->
-        <div class="rides-list">
-            <!-- Cursa 1 -->
-            <div class="ride-card">
-                <div class="ride-header">
-                    <div class="ride-route">
-                        <div class="route-point">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>București</span>
-                        </div>
-                        <div class="route-arrow">
-                            <i class="fas fa-arrow-right"></i>
-                        </div>
-                        <div class="route-point">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>Cluj-Napoca</span>
-                        </div>
-                    </div>
-                    <div class="ride-price">
-                        <span class="price">50 RON</span>
-                        <span class="per-seat">per loc</span>
-                    </div>
-                </div>
-                <div class="ride-details">
-                    <div class="ride-info">
-                        <div class="info-item">
-                            <i class="fas fa-calendar"></i>
-                            <span>15 Aug 2024</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-clock"></i>
-                            <span>14:30</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-users"></i>
-                            <span>3 locuri disponibile</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-user"></i>
-                            <span>Ion Popescu</span>
-                        </div>
-                    </div>
-                    <div class="ride-actions">
-                        <button class="btn-reserve">
-                            <i class="fas fa-ticket-alt"></i>
-                            Rezervă
-                        </button>
-                        <button class="btn-details">
-                            <i class="fas fa-info-circle"></i>
-                            Detalii
-                        </button>
-                    </div>
-                </div>
+        <div class="rides-list" id="rides-list">
+            <!-- Cursele vor fi încărcate dinamic aici -->
+            <div th:if="${#lists.isEmpty(rides)}" class="no-rides">
+                <i class="fas fa-search"></i>
+                <h3>Nu există curse disponibile</h3>
+                <p>Încearcă să modifici filtrele sau să revii mai târziu.</p>
             </div>
-
-            <!-- Cursa 2 -->
-            <div class="ride-card">
+            
+            <!-- Template pentru o cursă -->
+            <div th:each="ride : ${rides}" class="ride-card" th:data-ride-id="${ride.id}">
                 <div class="ride-header">
                     <div class="ride-route">
                         <div class="route-point">
                             <i class="fas fa-map-marker-alt"></i>
-                            <span>Iași</span>
+                            <span th:text="${ride.fromLocation}">De la</span>
                         </div>
                         <div class="route-arrow">
                             <i class="fas fa-arrow-right"></i>
                         </div>
                         <div class="route-point">
                             <i class="fas fa-map-marker-alt"></i>
-                            <span>București</span>
+                            <span th:text="${ride.toLocation}">Până la</span>
                         </div>
                     </div>
                     <div class="ride-price">
-                        <span class="price">35 RON</span>
+                        <span class="price" th:text="${ride.price + ' RON'}">0 RON</span>
                         <span class="per-seat">per loc</span>
                     </div>
                 </div>
@@ -125,90 +79,41 @@
                     <div class="ride-info">
                         <div class="info-item">
                             <i class="fas fa-calendar"></i>
-                            <span>16 Aug 2024</span>
+                            <span th:text="${#temporals.format(ride.travelDate, 'dd MMM yyyy')}">Data</span>
                         </div>
                         <div class="info-item">
                             <i class="fas fa-clock"></i>
-                            <span>09:00</span>
+                            <span th:text="${#temporals.format(ride.departureTime, 'HH:mm')}">Ora</span>
                         </div>
                         <div class="info-item">
                             <i class="fas fa-users"></i>
-                            <span>2 locuri disponibile</span>
+                            <span th:text="${ride.availableSeats + ' locuri disponibile'}">Locuri</span>
                         </div>
-                        <div class="info-item">
+                        <div class="info-item user-profile-link" th:data-user-id="${ride.userId}">
                             <i class="fas fa-user"></i>
-                            <span>Maria Ionescu</span>
+                            <span th:text="${ride.driverName}" class="driver-name">Șofer</span>
+                            <i class="fas fa-external-link-alt profile-link-icon"></i>
                         </div>
                     </div>
                     <div class="ride-actions">
-                        <button class="btn-reserve">
+                        <button class="btn-reserve" th:data-ride-id="${ride.id}">
                             <i class="fas fa-ticket-alt"></i>
                             Rezervă
                         </button>
-                        <button class="btn-details">
+                        <button class="btn-details" th:data-ride-id="${ride.id}">
                             <i class="fas fa-info-circle"></i>
                             Detalii
                         </button>
                     </div>
                 </div>
-            </div>
-
-            <!-- Cursa 3 -->
-            <div class="ride-card">
-                <div class="ride-header">
-                    <div class="ride-route">
-                        <div class="route-point">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>Timișoara</span>
-                        </div>
-                        <div class="route-arrow">
-                            <i class="fas fa-arrow-right"></i>
-                        </div>
-                        <div class="route-point">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>Cluj-Napoca</span>
-                        </div>
-                    </div>
-                    <div class="ride-price">
-                        <span class="price">45 RON</span>
-                        <span class="per-seat">per loc</span>
-                    </div>
-                </div>
-                <div class="ride-details">
-                    <div class="ride-info">
-                        <div class="info-item">
-                            <i class="fas fa-calendar"></i>
-                            <span>17 Aug 2024</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-clock"></i>
-                            <span>16:00</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-users"></i>
-                            <span>4 locuri disponibile</span>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-user"></i>
-                            <span>Alexandru Dumitrescu</span>
-                        </div>
-                    </div>
-                    <div class="ride-actions">
-                        <button class="btn-reserve">
-                            <i class="fas fa-ticket-alt"></i>
-                            Rezervă
-                        </button>
-                        <button class="btn-details">
-                            <i class="fas fa-info-circle"></i>
-                            Detalii
-                        </button>
-                    </div>
+                <div th:if="${ride.description}" class="ride-description">
+                    <p th:text="${ride.description}">Descriere</p>
                 </div>
             </div>
         </div>
 
         <!-- Paginare -->
-        <div class="pagination">
+        <div class="pagination" th:if="${#lists.size(rides) > 0}">
             <button class="page-btn active">1</button>
             <button class="page-btn">2</button>
             <button class="page-btn">3</button>
@@ -223,5 +128,7 @@
 
     <script src="script.js"></script>
     <script src="/autocomplete.js"></script>
+    <script src="navbar.js"></script>
+    <script src="rides.js"></script>
 </body>
 </html>
