@@ -67,9 +67,14 @@ public class PageController {
     
     @GetMapping("/profile/{userId}")
     public String userProfile(@PathVariable Long userId, Model model) {
-        // Pentru moment, redirecționăm la profilul propriu
-        // În viitor, aici vom afișa profilul utilizatorului cu ID-ul specificat
-        return "redirect:/profile";
+        // Adăugăm userId-ul în model pentru a fi folosit în template
+        model.addAttribute("targetUserId", userId);
+        return "profile";
+    }
+    
+    @GetMapping("/edit-profile")
+    public String editProfile() {
+        return "edit-profile";
     }
     
     @GetMapping("/uploads/profile-images/{filename}")

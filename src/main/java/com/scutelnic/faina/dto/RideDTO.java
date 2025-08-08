@@ -24,4 +24,5 @@ public class RideDTO {
     private String driverEmail;
     private String driverProfileImage;
     private LocalDateTime createdAt;
+    private Boolean isActive;
 }

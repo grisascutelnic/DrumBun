@@ -143,4 +143,41 @@ public class RideController {
             return ResponseEntity.badRequest().build();
         }
     }
+    
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<RideDTO>> getRidesByUserId(@PathVariable Long userId) {
+        try {
+            List<RideDTO> rides = rideService.getRidesByUserId(userId);
+            return ResponseEntity.ok(rides);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> deleteRide(@PathVariable Long id, HttpSession session) {
+        try {
+            // Verificăm dacă utilizatorul este logat
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Trebuie să fiți logat pentru a șterge o cursă.");
+                return ResponseEntity.status(401).body(response);
+            }
+            
+            // Ștergem cursa
+            rideService.deleteRide(id, user);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Cursa a fost ștearsă cu succes!");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Eroare la ștergerea cursei: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
 }

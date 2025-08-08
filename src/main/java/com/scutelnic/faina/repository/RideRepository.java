@@ -30,4 +30,7 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
     
     @Query("SELECT r FROM Ride r JOIN FETCH r.user WHERE r.user = :user ORDER BY r.createdAt DESC")
     List<Ride> findByUserOrderByCreatedAtDesc(@Param("user") com.scutelnic.faina.entity.User user);
+    
+    @Query("SELECT r FROM Ride r JOIN FETCH r.user WHERE r.user.id = :userId ORDER BY r.createdAt DESC")
+    List<Ride> findByUserIdOrderByCreatedAtDesc(@Param("userId") Long userId);
 }

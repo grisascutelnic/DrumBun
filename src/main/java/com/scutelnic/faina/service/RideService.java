@@ -85,6 +85,26 @@ public class RideService {
                    .collect(Collectors.toList());
     }
     
+    public List<RideDTO> getRidesByUserId(Long userId) {
+        List<Ride> rides = rideRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        return rides.stream()
+                   .map(this::convertToDTO)
+                   .collect(Collectors.toList());
+    }
+    
+    public void deleteRide(Long rideId, User user) {
+        Ride ride = rideRepository.findById(rideId)
+                .orElseThrow(() -> new RuntimeException("Cursa nu a fost găsită"));
+        
+        // Verificăm dacă utilizatorul este proprietarul cursei
+        if (!ride.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("Nu aveți permisiunea de a șterge această cursă");
+        }
+        
+        // Ștergem cursa
+        rideRepository.delete(ride);
+    }
+    
     private RideDTO convertToDTO(Ride ride) {
         User user = ride.getUser();
         return new RideDTO(
@@ -101,7 +121,8 @@ public class RideService {
             user.getPhone(),
             user.getEmail(),
             user.getProfileImage(),
-            ride.getCreatedAt()
+            ride.getCreatedAt(),
+            ride.getIsActive()
         );
     }
 }

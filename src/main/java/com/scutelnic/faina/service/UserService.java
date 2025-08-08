@@ -7,9 +7,16 @@ import com.scutelnic.faina.dto.RegisterRequest;
 import com.scutelnic.faina.dto.AuthResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -38,6 +45,74 @@ public class UserService {
     
     public User updateUser(User user) {
         return userRepository.save(user);
+    }
+    
+    public User updateProfile(Long userId, String firstName, String lastName, String email, 
+                            String phone, String currentPassword, String newPassword, 
+                            MultipartFile profileImage) {
+        
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Utilizatorul nu a fost găsit"));
+        
+        // Verificăm dacă email-ul nou nu este folosit de alt utilizator
+        if (!email.equals(user.getEmail()) && userRepository.existsByEmail(email)) {
+            throw new RuntimeException("Un utilizator cu acest email există deja");
+        }
+        
+        // Actualizăm informațiile de bază
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setEmail(email);
+        user.setPhone(phone);
+        
+        // Verificăm schimbarea parolei
+        if (newPassword != null && !newPassword.isEmpty()) {
+            if (currentPassword == null || currentPassword.isEmpty()) {
+                throw new RuntimeException("Parola actuală este obligatorie pentru a schimba parola");
+            }
+            
+            if (!Objects.equals(user.getPassword(), currentPassword)) {
+                throw new RuntimeException("Parola actuală este incorectă");
+            }
+            
+            if (newPassword.length() < 6) {
+                throw new RuntimeException("Parola nouă trebuie să aibă cel puțin 6 caractere");
+            }
+            
+            user.setPassword(newPassword);
+        }
+        
+        // Gestionăm imaginea de profil
+        if (profileImage != null && !profileImage.isEmpty()) {
+            try {
+                String fileName = saveProfileImage(profileImage);
+                user.setProfileImage(fileName);
+            } catch (IOException e) {
+                throw new RuntimeException("Eroare la salvarea imaginii: " + e.getMessage());
+            }
+        }
+        
+        return userRepository.save(user);
+    }
+    
+    private String saveProfileImage(MultipartFile file) throws IOException {
+        // Creăm directorul dacă nu există
+        String uploadDir = "uploads/profile-images/";
+        File dir = new File(uploadDir);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        
+        // Generăm un nume unic pentru fișier
+        String originalFileName = file.getOriginalFilename();
+        String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+        String fileName = UUID.randomUUID().toString() + fileExtension;
+        
+        // Salvăm fișierul
+        Path filePath = Paths.get(uploadDir + fileName);
+        Files.write(filePath, file.getBytes());
+        
+        return fileName;
     }
     
     public void deleteUser(Long id) {
