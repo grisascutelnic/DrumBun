@@ -33,13 +33,13 @@ body {
 .main-content {
     margin-top: 80px;
     min-height: calc(100vh - 80px);
-    padding: 2rem 0;
+    padding: 1rem 0;
 }
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 2rem;
+    padding: 0 1rem;
 }
 
 /* Button Styles */
@@ -207,11 +207,12 @@ body {
 /* Hero Section */
 .hero {
     min-height: 100vh;
-    background: linear-gradient(135deg, var(--secondary-green) 0%, var(--white) 100%);
+    background: linear-gradient(135deg, var(--secondary-green) 0%, var(--secondary-green) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 8rem 2rem 4rem;
+    position: relative;
 }
 
 .hero-content {
@@ -381,6 +382,16 @@ body {
     z-index: 100;
 }
 
+/* Specific pentru butonul flotant de pe pagina index */
+.hero + .add-ride-container {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 10;
+}
+
 .add-ride-btn {
     background: var(--primary-green);
     color: var(--white);
@@ -513,6 +524,14 @@ body {
     .add-ride-container {
         bottom: 1rem;
         right: 1rem;
+    }
+    
+    .hero + .add-ride-container {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        left: auto;
+        transform: none;
     }
     
     .add-ride-btn {
@@ -1380,34 +1399,12 @@ button:focus-visible, input:focus-visible {
 }
 
 /* Add Ride Page Styles */
-.add-ride-header {
-    text-align: center;
-    margin-bottom: 2rem;
-    padding: 2rem 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-radius: 12px;
-    margin-bottom: 2rem;
-}
-
-.add-ride-header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-}
-
-.add-ride-header p {
-    font-size: 1.1rem;
-    opacity: 0.9;
-}
-
 .add-ride-container {
     background: white;
     border-radius: 12px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     max-width: 800px;
-    margin: 0 auto;
-    margin-top: 2rem;
-    margin-bottom: 2rem;
+    margin: 2rem auto;
     width: 100%;
     position: relative;
     z-index: 1;
@@ -1728,10 +1725,19 @@ button:focus-visible, input:focus-visible {
 
 /* Add Ride Responsive */
 @media (max-width: 768px) {
+    /* Nu afectăm butonul flotant de pe pagina index */
     .add-ride-container {
-        margin: 0 1rem;
-        margin-top: 1rem;
-        margin-bottom: 1rem;
+        margin: 1rem;
+        width: calc(100% - 2rem);
+    }
+    
+    /* Păstrăm poziționarea fixă pentru butonul flotant */
+    .hero + .add-ride-container {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        z-index: 100;
+        margin: 0;
     }
     
     .add-ride-form {
@@ -1831,5 +1837,208 @@ button:focus-visible, input:focus-visible {
     to {
         transform: translateX(0);
         opacity: 1;
+    }
+}
+
+/* Authentication Styles */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 160px);
+    padding: 2rem 0;
+}
+
+.auth-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 500px;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.auth-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--black);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.auth-header h1 i {
+    color: var(--primary-green);
+}
+
+.auth-header p {
+    color: var(--gray);
+    font-size: 1rem;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.auth-form .form-group {
+    margin-bottom: 0;
+}
+
+.auth-form .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.auth-form label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--dark-gray);
+    margin-bottom: 0.5rem;
+}
+
+.auth-form label i {
+    color: var(--primary-green);
+}
+
+.auth-form input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e5e7eb;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: var(--transition);
+    background: var(--white);
+}
+
+.auth-form input:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--dark-gray);
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}
+
+.checkmark {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #e5e7eb;
+    border-radius: 4px;
+    display: inline-block;
+    position: relative;
+    transition: var(--transition);
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark {
+    background: var(--primary-green);
+    border-color: var(--primary-green);
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--white);
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.auth-btn {
+    background: var(--primary-green);
+    color: var(--white);
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.auth-btn:hover {
+    background: var(--primary-green-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.auth-footer p {
+    margin-bottom: 0.5rem;
+    color: var(--gray);
+}
+
+.auth-link {
+    color: var(--primary-green);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.auth-link:hover {
+    color: var(--primary-green-dark);
+    text-decoration: underline;
+}
+
+/* Responsive pentru autentificare */
+@media (max-width: 768px) {
+    .auth-container {
+        padding: 1rem;
+        min-height: calc(100vh - 120px);
+    }
+    
+    .auth-card {
+        padding: 2rem;
+        margin: 1rem;
+    }
+    
+    .auth-form .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .auth-header h1 {
+        font-size: 1.75rem;
     }
 }

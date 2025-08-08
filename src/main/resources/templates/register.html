@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ro" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Înregistrare - DrumBun</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Include Navigation -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <h1><i class="fas fa-user-plus"></i> Înregistrare</h1>
+                        <p>Creează-ți contul pentru a începe să călătorești</p>
+                    </div>
+
+                    <form id="register-form" class="auth-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="firstName">
+                                    <i class="fas fa-user"></i>
+                                    Prenume
+                                </label>
+                                <input type="text" id="firstName" name="firstName" placeholder="Introduceți prenumele" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="lastName">
+                                    <i class="fas fa-user"></i>
+                                    Nume
+                                </label>
+                                <input type="text" id="lastName" name="lastName" placeholder="Introduceți numele" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">
+                                <i class="fas fa-envelope"></i>
+                                Email
+                            </label>
+                            <input type="email" id="email" name="email" placeholder="Introduceți adresa de email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">
+                                <i class="fas fa-phone"></i>
+                                Telefon
+                            </label>
+                            <input type="tel" id="phone" name="phone" placeholder="Introduceți numărul de telefon" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password">
+                                <i class="fas fa-lock"></i>
+                                Parolă
+                            </label>
+                            <input type="password" id="password" name="password" placeholder="Introduceți parola" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirm-password">
+                                <i class="fas fa-lock"></i>
+                                Confirmă parola
+                            </label>
+                            <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirmați parola" required>
+                        </div>
+
+                        <div class="form-group checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="terms" name="terms" required>
+                                <span class="checkmark"></span>
+                                Sunt de acord cu <a href="/terms" class="auth-link">Termenii și Condițiile</a>
+                            </label>
+                        </div>
+
+                        <div class="form-group checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="newsletter" name="newsletter">
+                                <span class="checkmark"></span>
+                                Vreau să primesc notificări despre oferte speciale
+                            </label>
+                        </div>
+
+                        <button type="submit" id="register-btn" class="auth-btn">
+                            <i class="fas fa-user-plus"></i>
+                            Înregistrare
+                        </button>
+                    </form>
+
+                    <div class="auth-footer">
+                        <p>Ai deja cont? <a href="/login" class="auth-link">Conectează-te aici</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Include Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script src="register.js"></script>
+</body>
+</html>

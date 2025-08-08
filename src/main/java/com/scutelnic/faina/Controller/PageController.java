@@ -30,4 +30,14 @@ public class PageController {
     public String addRide() {
         return "add-ride";
     }
+    
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
+    
+    @GetMapping("/register")
+    public String register() {
+        return "register";
+    }
 }
