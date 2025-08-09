@@ -3833,7 +3833,7 @@ html {
 }
 
 .search-field.date-field {
-    flex: 0 0 160px;
+    /* flex: 0 0 160px; */
     min-width: 160px;
 }
 
@@ -4001,28 +4001,6 @@ html {
     }
 }
 
-@media (max-width: 900px) {
-    .search-fields {
-        gap: 0.5rem;
-    }
-    
-    .search-field {
-        min-width: 160px;
-    }
-    
-    .search-field.date-field {
-        min-width: 120px;
-    }
-    
-    .search-actions-main {
-        gap: 0.5rem;
-    }
-    
-    .search-btn,
-    .clear-link {
-        min-width: 120px;
-    }
-}
 
 @media (max-width: 768px) {
     .search-section {
@@ -4072,24 +4050,12 @@ html {
     
     .search-fields {
         gap: 0.5rem;
-        margin-bottom: 0; /* Elimină spațiul de jos */
+        margin-bottom: 0; /* Adaugă această linie */
     }
     
     .search-actions-main {
         gap: 0.5rem;
-        margin-top: 0; /* Elimină spațiul de sus */
-    }
-    
-    /* Elimină complet spațiul dintre câmpuri și butoane */
-    .search-actions {
-        padding-top: 0 !important;
-        border-top: none !important;
-        margin-top: 0 !important;
-    }
-    
-    /* Elimină spațiul de la label-urile câmpurilor */
-    .search-field label {
-        margin-bottom: 0 !important;
+        margin-top: 0; /* Adaugă această linie */
     }
 }
 
