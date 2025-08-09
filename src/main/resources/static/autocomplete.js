@@ -1,4 +1,5 @@
 // Funcții comune pentru autocompletarea localităților
+// Updated: 2024-12-19 15:30 - Fixed extractShortAddress function with logging
 let autocompleteInitialized = false;
 
 // Inițializarea autocomplete pentru toate paginile
@@ -8,7 +9,7 @@ function initializeGlobalAutocomplete() {
     console.log('Initializing global autocomplete...');
     
     // Găsim toate input-urile pentru localități
-    const locationInputs = document.querySelectorAll('input[id*="location"], input[id*="filter"]');
+    const locationInputs = document.querySelectorAll('input[id*="location"], input[id*="filter"], input[id="from"], input[id="to"]');
     
     locationInputs.forEach(input => {
         const inputId = input.id;
@@ -20,8 +21,12 @@ function initializeGlobalAutocomplete() {
             // Pentru pagina rides
             suggestionsId = `${inputId}-suggestions`;
             type = inputId; // Păstrăm ID-ul complet pentru a putea diferenția
+        } else if (inputId === 'from' || inputId === 'to') {
+            // Pentru pagina index
+            suggestionsId = `${inputId}-suggestions`;
+            type = inputId;
         } else {
-            // Pentru paginile index și add-ride
+            // Pentru paginile add-ride
             suggestionsId = inputId.replace('location', 'suggestions');
             type = inputId.includes('from') ? 'from' : 'to';
         }
@@ -114,6 +119,16 @@ function setupAutocomplete(input, suggestionsId, type) {
         }
     });
     
+    // Pentru input-urile din pagina index, verificăm și wrapper-ul
+    if (input.parentNode && input.parentNode.classList.contains('input-wrapper')) {
+        document.addEventListener('click', function(e) {
+            const wrapper = input.parentNode;
+            if (!wrapper.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+                hideSuggestions(suggestionsContainer);
+            }
+        });
+    }
+    
     // Gestionarea focus-ului pentru a afișa sugestiile dacă există text
     input.addEventListener('focus', function() {
         const query = this.value.trim();
@@ -197,7 +212,24 @@ function calculateRelevance(item, query) {
 function formatDisplayName(item) {
     const address = item.address || {};
     
-    // Încercăm să găsim cel mai specific nume
+    // Pentru orașe mari, returnăm doar numele
+    const majorCities = ['chisinau', 'bălți', 'orhei', 'soroca', 'ungheni', 'cahul', 'strășeni', 'călărași', 'florești', 'drochia', 'rîșcani', 'glodeni', 'fălești', 'sîngerei', 'rezina', 'telenești', 'criuleni', 'aneni noi', 'cimișlia', 'leova', 'cantemir', 'ștefan vodă', 'căușeni', 'hîncești', 'ialoveni', 'nisporeni', 'ocnița', 'dondușeni', 'edineț', 'briceni', 'comrat', 'vulcănești', 'ceadîr-lunga', 'taraclia', 'basarabeasca', 'căinari', 'criuleni', 'dubăsari', 'grigoriopol', 'camenca', 'rîbnița', 'slobozia', 'tiraspol', 'bender', 'tiraspol'];
+    
+    // Verificăm dacă este un oraș mare
+    if (address.city) {
+        const cityName = address.city.toLowerCase();
+        if (majorCities.some(city => cityName.includes(city) || city.includes(cityName))) {
+            return address.city; // Returnăm doar numele orașului
+        }
+    }
+    if (address.town) {
+        const townName = address.town.toLowerCase();
+        if (majorCities.some(city => townName.includes(city) || city.includes(townName))) {
+            return address.town; // Returnăm doar numele orașului
+        }
+    }
+    
+    // Pentru sate și orașe mici, returnăm numele complet
     if (address.city) return address.city;
     if (address.town) return address.town;
     if (address.village) return address.village;
@@ -293,6 +325,92 @@ function getLocationTypeLabel(type) {
     }
 }
 
+// Extragerea doar a satului și raionului din adresa completă
+function extractShortAddress(fullAddress) {
+    if (!fullAddress) return '';
+    
+    console.log('extractShortAddress called with:', fullAddress);
+    
+    const parts = fullAddress.split(',').map(part => part.trim());
+    let shortAddress = [];
+    
+    console.log('Parts split:', parts);
+    
+    // Pentru orașe mari (Chisinau, Balti, Orhei, Soroca, etc.) - returnăm doar numele
+    const majorCities = ['chisinau', 'bălți', 'orhei', 'soroca', 'ungheni', 'cahul', 'strășeni', 'călărași', 'florești', 'drochia', 'rîșcani', 'glodeni', 'fălești', 'sîngerei', 'rezina', 'telenești', 'criuleni', 'aneni noi', 'cimișlia', 'leova', 'cantemir', 'ștefan vodă', 'căușeni', 'hîncești', 'ialoveni', 'nisporeni', 'ocnița', 'dondușeni', 'edineț', 'briceni', 'comrat', 'vulcănești', 'ceadîr-lunga', 'taraclia', 'basarabeasca', 'căinari', 'criuleni', 'dubăsari', 'grigoriopol', 'camenca', 'rîbnița', 'slobozia', 'tiraspol', 'bender', 'tiraspol'];
+    
+    // Verificăm dacă primul element este un oraș mare
+    if (parts.length > 0) {
+        const firstPart = parts[0].toLowerCase();
+        if (majorCities.some(city => firstPart.includes(city) || city.includes(firstPart))) {
+            return parts[0]; // Returnăm doar numele orașului
+        }
+    }
+    
+    // Pentru sate și orașe mici - căutăm satul/orășelul (primul element relevant)
+    for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+        // Verificăm dacă nu este doar un tip de locație (raion, țară, etc.)
+        if (part && 
+            !part.toLowerCase().includes('raion') && 
+            !part.toLowerCase().includes('moldova') && 
+            !part.toLowerCase().includes('md-') &&
+            !part.toLowerCase().includes('district') &&
+            !part.toLowerCase().includes('county') &&
+            !part.toLowerCase().includes('municipality') &&
+            part.length > 1) {
+            shortAddress.push(part);
+            break;
+        }
+    }
+    
+    // Căutăm raionul (următorul element relevant)
+    for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+        if (part && part.toLowerCase().includes('raion')) {
+            shortAddress.push(part);
+            break;
+        }
+    }
+    
+    // Dacă nu am găsit raion, încercăm să găsim district, county, municipality sau alte diviziuni administrative
+    if (shortAddress.length === 1) {
+        for (let i = 0; i < parts.length; i++) {
+            const part = parts[i];
+            if (part && 
+                (part.toLowerCase().includes('district') || 
+                 part.toLowerCase().includes('county') ||
+                 part.toLowerCase().includes('municipality') ||
+                 part.toLowerCase().includes('gagauzia') ||
+                 part.toLowerCase().includes('autonomous')) &&
+                !part.toLowerCase().includes('moldova')) {
+                
+                // Pentru district, county, municipality - extragem doar numele, nu cuvântul complet
+                let cleanPart = part;
+                if (part.toLowerCase().includes('district')) {
+                    cleanPart = part.replace(/district/i, '').trim();
+                } else if (part.toLowerCase().includes('county')) {
+                    cleanPart = part.replace(/county/i, '').trim();
+                } else if (part.toLowerCase().includes('municipality')) {
+                    cleanPart = part.replace(/municipality/i, '').trim();
+                }
+                
+                shortAddress.push(cleanPart);
+                break;
+            }
+        }
+    }
+    
+    // Dacă nu am găsit nimic, returnăm primul element
+    if (shortAddress.length === 0 && parts.length > 0) {
+        shortAddress.push(parts[0]);
+    }
+    
+    const result = shortAddress.join(', ');
+    console.log('Final short address result:', result);
+    return result;
+}
+
 // Actualizarea selecției cu săgețile
 function updateSelection(suggestions, selectedIndex) {
     suggestions.forEach((item, index) => {
@@ -311,11 +429,19 @@ function selectSuggestion(suggestionItem, input, type) {
     const lat = suggestionItem.dataset.lat;
     const lon = suggestionItem.dataset.lon;
     
-    // Afișăm adresa completă în input (din subtitle)
-    input.value = fullAddress;
+    console.log('selectSuggestion called with:', { displayName, fullAddress, type });
+    
+    // Extragem doar satul și raionul din adresa completă
+    const shortAddress = extractShortAddress(fullAddress);
+    
+    console.log('Short address extracted:', shortAddress);
+    
+    // Afișăm doar satul și raionul în input
+    input.value = shortAddress;
     
     // Adăugăm atribute pentru referință
     input.setAttribute('data-full-address', fullAddress);
+    input.setAttribute('data-short-address', shortAddress);
     input.setAttribute('data-lat', lat);
     input.setAttribute('data-lon', lon);
     
@@ -325,12 +451,21 @@ function selectSuggestion(suggestionItem, input, type) {
         hideSuggestions(suggestionsContainer);
     }
     
+    // Pentru input-urile din pagina index, căutăm în wrapper
+    if (!suggestionsContainer && input.parentNode.parentNode) {
+        const wrapperSuggestions = input.parentNode.parentNode.querySelector('.suggestions-dropdown');
+        if (wrapperSuggestions) {
+            hideSuggestions(wrapperSuggestions);
+        }
+    }
+    
     // Trigger pentru evenimente custom dacă există
     const event = new CustomEvent('locationSelected', {
         detail: {
             input: input,
-            value: fullAddress,
+            value: shortAddress,
             fullAddress: fullAddress,
+            shortAddress: shortAddress,
             type: type,
             lat: lat,
             lon: lon

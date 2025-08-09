@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ro">
+<html lang="ro" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,32 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Bara de navigare -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <a href="/" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="fas fa-car"></i>
-                    <span>DrumBun</span>
-                </a>
-            </div>
-            <div class="nav-menu">
-                <a href="/" class="nav-link">Acasă</a>
-                <a href="/rides" class="nav-link">Călătorii</a>
-                <a href="/about" class="nav-link active">Despre</a>
-                <a href="/contact" class="nav-link">Contact</a>
-            </div>
-            <div class="nav-auth">
-                <button class="btn-login">Conectare</button>
-                <button class="btn-register">Înregistrare</button>
-            </div>
-            <div class="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </div>
-    </nav>
+    <!-- Include Navigation -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
 
     <!-- Conținut principal -->
     <main class="about-container">

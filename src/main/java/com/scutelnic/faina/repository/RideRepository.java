@@ -33,4 +33,10 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
     
     @Query("SELECT r FROM Ride r JOIN FETCH r.user WHERE r.user.id = :userId ORDER BY r.createdAt DESC")
     List<Ride> findByUserIdOrderByCreatedAtDesc(@Param("userId") Long userId);
+    
+    @Query("SELECT r FROM Ride r JOIN FETCH r.user WHERE r.isActive = true ORDER BY r.createdAt DESC")
+    List<Ride> findTop5RecentRides();
+    
+    @Query("SELECT r FROM Ride r WHERE r.isActive = true AND r.travelDate < :currentDateTime")
+    List<Ride> findExpiredRides(@Param("currentDateTime") LocalDateTime currentDateTime);
 }

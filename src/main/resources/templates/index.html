@@ -3,108 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>DrumBun - Călătorii Împărtășite</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/styles.css?v=1.7">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Include Navigation -->
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <!-- Hero Section cu formularul de căutare -->
-    <main class="hero">
-        <div class="hero-content">
-            <h1 class="hero-title">Găsește călătoria perfectă</h1>
-            <p class="hero-subtitle">Conectează-te cu șoferi și călători din întreaga Românie</p>
-            
-            <!-- Formularul de căutare -->
-            <div class="search-container">
-                <div class="search-form">
-                    <!-- De la -->
-                    <div class="form-group">
-                        <label for="from-location">
-                            <i class="fas fa-map-marker-alt"></i>
-                            De la
-                        </label>
-                        <div class="location-input-container">
-                            <input type="text" id="from-location" placeholder="Introduceți localitatea de plecare">
-                            <div id="from-suggestions" class="suggestions-dropdown"></div>
-                        </div>
+    <main class="main-content">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-background"></div>
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1 class="hero-title">DrumBun</h1>
+                        <p class="hero-subtitle">Conectează-te cu șoferi și călători din întreaga Moldovă</p>
+                        
                     </div>
 
-                    <!-- Până la -->
-                    <div class="form-group">
-                        <label for="to-location">
-                            <i class="fas fa-map-marker-alt"></i>
-                            Până la
-                        </label>
-                        <div class="location-input-container">
-                            <input type="text" id="to-location" placeholder="Introduceți localitatea de destinație">
-                            <div id="to-suggestions" class="suggestions-dropdown"></div>
-                        </div>
-                    </div>
-
-                    <!-- Data călătoriei -->
-                    <div class="form-group">
-                        <label for="travel-date">
-                            <i class="fas fa-calendar-alt"></i>
-                            Data călătoriei
-                        </label>
-                        <input type="date" id="travel-date">
-                    </div>
-
-                    <!-- Pasageri și Colete -->
-                    <div class="form-group passengers-luggage">
-                        <div class="passenger-section">
-                            <label>
-                                <i class="fas fa-users"></i>
-                                Pasageri
-                            </label>
-                            <div class="counter">
-                                <button class="counter-btn minus" data-type="passengers">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                                <span class="counter-value" id="passengers-count">1</span>
-                                <button class="counter-btn plus" data-type="passengers">
-                                    <i class="fas fa-plus"></i>
-                                </button>
+                    <!-- Main Action Buttons -->
+                    <div class="main-actions">
+                        <div class="action-buttons-container">
+                            <div class="action-card driver-card">
+                                <div class="action-header">
+                                    <h3>Ești șofer?</h3>
+                                </div>
+                                <a href="/add-ride" class="action-btn action-btn-primary">
+                                    <div class="btn-icon">
+                                        <i class="fas fa-car"></i>
+                                    </div>
+                                    <div class="btn-content">
+                                        <span class="btn-title">Crează o cursă</span>
+                                        <span class="btn-subtitle">Împărtășește drumul tău și economisește</span>
+                                    </div>
+                                </a>
                             </div>
-                        </div>
-
-                        <div class="luggage-section">
-                            <label>
-                                <i class="fas fa-suitcase"></i>
-                                Colete
-                            </label>
-                            <div class="counter">
-                                <button class="counter-btn minus" data-type="luggage">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                                <span class="counter-value" id="luggage-count">0</span>
-                                <button class="counter-btn plus" data-type="luggage">
-                                    <i class="fas fa-plus"></i>
-                                </button>
+                            
+                            <div class="action-card passenger-card">
+                                <div class="action-header">
+                                    <h3>Ești pasager/călător?</h3>
+                                </div>
+                                <a href="/rides" class="action-btn action-btn-secondary">
+                                    <div class="btn-icon">
+                                        <i class="fas fa-search"></i>
+                                    </div>
+                                    <div class="btn-content">
+                                        <span class="btn-title">Caută o cursă</span>
+                                        <span class="btn-subtitle">Găsește călătoria perfectă pentru tine</span>
+                                    </div>
+                                </a>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Butonul de căutare -->
-                    <button class="search-btn">
-                        <i class="fas fa-search"></i>
-                        Caută călătorii
-                    </button>
                 </div>
             </div>
+        </section>
 
-            <!-- Butonul pentru adăugarea unei curse noi -->
-            <div class="add-ride-container">
-                <button class="add-ride-btn" id="add-ride-btn">
-                    <i class="fas fa-plus"></i>
-                    Adaugă o cursă nouă
-                </button>
+        <!-- Recent Rides Section -->
+        <section class="recent-rides" th:if="${not #lists.isEmpty(recentRides)}">
+            <div class="container">
+                <div class="recent-rides-header">
+                    <h2>Cele mai recente curse</h2>
+                    <p>Descoperă ofertele noi de pe platformă</p>
+                </div>
+                <div class="rides-list">
+                    <div th:each="ride : ${recentRides}" class="ride-card" th:data-ride-id="${ride.id}">
+                        <div class="ride-header">
+                            <div class="ride-route">
+                                <div class="route-point">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span th:text="${ride.fromLocation}">De la</span>
+                                </div>
+                                <div class="route-arrow">
+                                    <i class="fas fa-arrow-right"></i>
+                                </div>
+                                <div class="route-point">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span th:text="${ride.toLocation}">Până la</span>
+                                </div>
+                            </div>
+                            <div class="ride-price">
+                                <span class="price" th:text="${ride.price + ' RON'}">0 RON</span>
+                                <span class="per-seat">per loc</span>
+                            </div>
+                        </div>
+                        <div class="ride-details">
+                            <div class="ride-info">
+                                <div class="info-item">
+                                    <i class="fas fa-calendar"></i>
+                                    <span th:text="${#temporals.format(ride.travelDate, 'dd MMM yyyy')}">Data</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span th:text="${#temporals.format(ride.departureTime, 'HH:mm')}">Ora</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-users"></i>
+                                    <span th:text="${ride.availableSeats + ' locuri disponibile'}">Locuri</span>
+                                </div>
+                                <div class="info-item user-profile-link" th:data-user-id="${ride.userId}">
+                                    <i class="fas fa-user"></i>
+                                    <span th:text="${ride.driverName}" class="driver-name">Șofer</span>
+                                    <i class="fas fa-external-link-alt profile-link-icon"></i>
+                                </div>
+                            </div>
+                            <div class="ride-actions">
+                                <a th:href="@{'/rides'}" class="btn-reserve">
+                                    <i class="fas fa-search"></i>
+                                    Vezi toate cursele
+                                </a>
+                            </div>
+                        </div>
+                        <div th:if="${ride.description}" class="ride-description">
+                            <p th:text="${ride.description}">Descriere</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features">
+            <div class="container">
+                <div class="features-header">
+                    <h2>De ce DrumBun?</h2>
+                    <p>Descoperă avantajele platformei noastre</p>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <h3>Eco-friendly</h3>
+                        <p>Reduce amprenta de carbon prin partajarea mașinilor</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <h3>Economie</h3>
+                        <p>Împarte costurile de transport cu alți călători</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3>Comunitate</h3>
+                        <p>Cunoaște oameni noi și fă conexii valoroase</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>Siguranță</h3>
+                        <p>Profiluri verificate și sistem de rating</p>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- Include Footer -->
@@ -113,6 +178,18 @@
     <script src="script.js"></script>
     <script src="/autocomplete.js"></script>
     <script src="navbar.js"></script>
-    <script src="index.js"></script>
+    <script>
+        // Force CSS reload to prevent caching issues
+        (function() {
+            var links = document.getElementsByTagName('link');
+            for (var i = 0; i < links.length; i++) {
+                if (links[i].rel === 'stylesheet') {
+                    var href = links[i].href;
+                    var separator = href.indexOf('?') === -1 ? '?' : '&';
+                    links[i].href = href + separator + 'v=' + new Date().getTime();
+                }
+            }
+        })();
+    </script>
 </body>
 </html>

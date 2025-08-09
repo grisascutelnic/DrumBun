@@ -21,6 +21,9 @@ public class RideService {
     private RideRepository rideRepository;
     
     public List<RideDTO> getAllActiveRides() {
+        // Curățăm automat cursele expirate
+        cleanupExpiredRides();
+        
         LocalDateTime currentDate = LocalDateTime.now();
         List<Ride> rides = rideRepository.findAllActiveRides(currentDate);
         return rides.stream()
@@ -29,6 +32,9 @@ public class RideService {
     }
     
     public List<RideDTO> searchRides(SearchRideRequest request) {
+        // Curățăm automat cursele expirate
+        cleanupExpiredRides();
+        
         LocalDateTime travelDateTime = request.getTravelDate().atStartOfDay();
         
         List<Ride> rides = rideRepository.searchRides(
@@ -50,6 +56,9 @@ public class RideService {
     }
     
     public RideDTO addRide(AddRideRequest request, User user) {
+        // Curățăm automat cursele expirate
+        cleanupExpiredRides();
+        
         Ride ride = new Ride();
         ride.setFromLocation(request.getFromLocation());
         ride.setToLocation(request.getToLocation());
@@ -65,20 +74,30 @@ public class RideService {
     }
     
     public RideDTO getRideById(Long id) {
+        // Curățăm automat cursele expirate
+        cleanupExpiredRides();
+        
         Ride ride = rideRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cursa nu a fost găsită"));
         return convertToDTO(ride);
     }
     
     public List<String> getAllFromLocations() {
+        // Curățăm automat cursele expirate
+        cleanupExpiredRides();
         return rideRepository.findAllFromLocations();
     }
     
     public List<String> getAllToLocations() {
+        // Curățăm automat cursele expirate
+        cleanupExpiredRides();
         return rideRepository.findAllToLocations();
     }
     
     public List<RideDTO> getRidesByUser(User user) {
+        // Curățăm automat cursele expirate
+        cleanupExpiredRides();
+        
         List<Ride> rides = rideRepository.findByUserOrderByCreatedAtDesc(user);
         return rides.stream()
                    .map(this::convertToDTO)
@@ -86,13 +105,44 @@ public class RideService {
     }
     
     public List<RideDTO> getRidesByUserId(Long userId) {
+        // Curățăm automat cursele expirate
+        cleanupExpiredRides();
+        
         List<Ride> rides = rideRepository.findByUserIdOrderByCreatedAtDesc(userId);
         return rides.stream()
                    .map(this::convertToDTO)
                    .collect(Collectors.toList());
     }
     
+    public List<RideDTO> getTop5RecentRides() {
+        // Curățăm automat cursele expirate
+        cleanupExpiredRides();
+        
+        List<Ride> rides = rideRepository.findTop5RecentRides();
+        return rides.stream()
+                   .limit(5)
+                   .map(this::convertToDTO)
+                   .collect(Collectors.toList());
+    }
+    
+    /**
+     * Curăță automat cursele care au trecut data de călătorie
+     */
+    public void cleanupExpiredRides() {
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        List<Ride> expiredRides = rideRepository.findExpiredRides(currentDateTime);
+        
+        if (!expiredRides.isEmpty()) {
+            // Setăm cursele ca inactive în loc să le ștergem
+            expiredRides.forEach(ride -> ride.setIsActive(false));
+            rideRepository.saveAll(expiredRides);
+        }
+    }
+    
     public void deleteRide(Long rideId, User user) {
+        // Curățăm automat cursele expirate
+        cleanupExpiredRides();
+        
         Ride ride = rideRepository.findById(rideId)
                 .orElseThrow(() -> new RuntimeException("Cursa nu a fost găsită"));
         

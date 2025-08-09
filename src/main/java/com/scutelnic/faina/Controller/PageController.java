@@ -24,7 +24,9 @@ public class PageController {
     private RideService rideService;
     
     @GetMapping("/")
-    public String index() {
+    public String index(Model model) {
+        List<RideDTO> recentRides = rideService.getTop5RecentRides();
+        model.addAttribute("recentRides", recentRides);
         return "index";
     }
     

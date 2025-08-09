@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Stiluri CSS</title>
+    <link rel="stylesheet" href="src/main/resources/static/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #d1fae5;
+            margin: 0;
+            padding: 20px;
+            font-family: 'Inter', sans-serif;
+        }
+        .test-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        .test-title {
+            text-align: center;
+            color: #10b981;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">Test Stiluri CSS</h1>
+        
+        <!-- Test Main Actions -->
+        <div class="main-actions">
+            <div class="action-buttons-container">
+                <div class="action-card driver-card">
+                    <div class="action-header">
+                        <h3>Ești șofer?</h3>
+                    </div>
+                    <a href="#" class="action-btn action-btn-primary">
+                        <div class="btn-icon">
+                            <i class="fas fa-car"></i>
+                        </div>
+                        <div class="btn-content">
+                            <span class="btn-title">Crează o cursă</span>
+                            <span class="btn-subtitle">Împărtășește drumul tău și economisește</span>
+                        </div>
+                    </a>
+                </div>
+                
+                <div class="action-card passenger-card">
+                    <div class="action-header">
+                        <h3>Ești pasager/călător?</h3>
+                    </div>
+                    <a href="#" class="action-btn action-btn-secondary">
+                        <div class="btn-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="btn-content">
+                            <span class="btn-title">Caută o cursă</span>
+                            <span class="btn-subtitle">Găsește călătoria perfectă pentru tine</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 2rem; text-align: center; color: #666;">
+            <p>Dacă vezi stilurile aplicate corect, înseamnă că CSS-ul funcționează.</p>
+            <p>Fundalul paginii ar trebui să fie #d1fae5 (verde deschis).</p>
+        </div>
+    </div>
+</body>
+</html>

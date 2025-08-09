@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Autocomplete - extractShortAddress</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-case {
+            background: #f5f5f5;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        .result {
+            background: #e8f5e8;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        .error {
+            background: #ffe8e8;
+            color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test pentru extractShortAddress</h1>
+    <p>Testează funcția de extragere a adreselor scurte pentru diferite tipuri de localități din Moldova.</p>
+
+    <div class="test-case">
+        <h3>Test 1: Sat (Seliste)</h3>
+        <input type="text" class="input" id="test1" value="Seliste, Nisporeni District, Moldova" readonly>
+        <button onclick="testExtract(1)">Testează</button>
+        <div id="result1" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-case">
+        <h3>Test 2: Oraș mare (Chisinau)</h3>
+        <input type="text" class="input" id="test2" value="Chișinău, Chișinău Municipality, Moldova" readonly>
+        <button onclick="testExtract(2)">Testează</button>
+        <div id="result2" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-case">
+        <h3>Test 3: Oraș mare (Balti)</h3>
+        <input type="text" class="input" id="test3" value="Bălți, Bălți Municipality, Moldova" readonly>
+        <button onclick="testExtract(3)">Testează</button>
+        <div id="result3" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-case">
+        <h3>Test 4: Oraș mare (Orhei)</h3>
+        <input type="text" class="input" id="test4" value="Orhei, Orhei District, Moldova" readonly>
+        <button onclick="testExtract(4)">Testează</button>
+        <div id="result4" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-case">
+        <h3>Test 5: Alt sat</h3>
+        <input type="text" class="input" id="test5" value="Vărzărești, Nisporeni District, Moldova" readonly>
+        <button onclick="testExtract(5)">Testează</button>
+        <div id="result5" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-case">
+        <h3>Test 6: Oraș mare (Soroca)</h3>
+        <input type="text" class="input" id="test6" value="Soroca, Soroca District, Moldova" readonly>
+        <button onclick="testExtract(6)">Testează</button>
+        <div id="result6" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        // Funcția extractShortAddress din autocomplete.js
+        function extractShortAddress(fullAddress) {
+            if (!fullAddress) return '';
+            
+            console.log('extractShortAddress called with:', fullAddress);
+            
+            const parts = fullAddress.split(',').map(part => part.trim());
+            let shortAddress = [];
+            
+            console.log('Parts split:', parts);
+            
+            // Pentru orașe mari (Chisinau, Balti, Orhei, Soroca, etc.) - returnăm doar numele
+            const majorCities = ['chisinau', 'bălți', 'orhei', 'soroca', 'ungheni', 'cahul', 'strășeni', 'călărași', 'florești', 'drochia', 'rîșcani', 'glodeni', 'fălești', 'sîngerei', 'rezina', 'telenești', 'criuleni', 'aneni noi', 'cimișlia', 'leova', 'cantemir', 'ștefan vodă', 'căușeni', 'hîncești', 'ialoveni', 'nisporeni', 'ocnița', 'dondușeni', 'edineț', 'briceni', 'comrat', 'vulcănești', 'ceadîr-lunga', 'taraclia', 'basarabeasca', 'căinari', 'criuleni', 'dubăsari', 'grigoriopol', 'camenca', 'rîbnița', 'slobozia', 'tiraspol', 'bender', 'tiraspol'];
+            
+            // Verificăm dacă primul element este un oraș mare
+            if (parts.length > 0) {
+                const firstPart = parts[0].toLowerCase();
+                if (majorCities.some(city => firstPart.includes(city) || city.includes(firstPart))) {
+                    return parts[0]; // Returnăm doar numele orașului
+                }
+            }
+            
+            // Pentru sate și orașe mici - căutăm satul/orășelul (primul element relevant)
+            for (let i = 0; i < parts.length; i++) {
+                const part = parts[i];
+                // Verificăm dacă nu este doar un tip de locație (raion, țară, etc.)
+                if (part && 
+                    !part.toLowerCase().includes('raion') && 
+                    !part.toLowerCase().includes('moldova') && 
+                    !part.toLowerCase().includes('md-') &&
+                    !part.toLowerCase().includes('district') &&
+                    !part.toLowerCase().includes('county') &&
+                    !part.toLowerCase().includes('municipality') &&
+                    part.length > 1) {
+                    shortAddress.push(part);
+                    break;
+                }
+            }
+            
+            // Căutăm raionul (următorul element relevant)
+            for (let i = 0; i < parts.length; i++) {
+                const part = parts[i];
+                if (part && part.toLowerCase().includes('raion')) {
+                    shortAddress.push(part);
+                    break;
+                }
+            }
+            
+                // Dacă nu am găsit raion, încercăm să găsim district, county, municipality sau alte diviziuni administrative
+    if (shortAddress.length === 1) {
+        for (let i = 0; i < parts.length; i++) {
+            const part = parts[i];
+            if (part && 
+                (part.toLowerCase().includes('district') || 
+                 part.toLowerCase().includes('county') ||
+                 part.toLowerCase().includes('municipality') ||
+                 part.toLowerCase().includes('gagauzia') ||
+                 part.toLowerCase().includes('autonomous')) &&
+                !part.toLowerCase().includes('moldova')) {
+                
+                // Pentru district, county, municipality - extragem doar numele, nu cuvântul complet
+                let cleanPart = part;
+                if (part.toLowerCase().includes('district')) {
+                    cleanPart = part.replace(/district/i, '').trim();
+                } else if (part.toLowerCase().includes('county')) {
+                    cleanPart = part.replace(/county/i, '').trim();
+                } else if (part.toLowerCase().includes('municipality')) {
+                    cleanPart = part.replace(/municipality/i, '').trim();
+                }
+                
+                shortAddress.push(cleanPart);
+                break;
+            }
+        }
+    }
+            
+            // Dacă nu am găsit nimic, returnăm primul element
+            if (shortAddress.length === 0 && parts.length > 0) {
+                shortAddress.push(parts[0]);
+            }
+            
+            const result = shortAddress.join(', ');
+            console.log('Final short address result:', result);
+            return result;
+        }
+
+        function testExtract(testNumber) {
+            const input = document.getElementById(`test${testNumber}`);
+            const resultDiv = document.getElementById(`result${testNumber}`);
+            const fullAddress = input.value;
+            
+            const shortAddress = extractShortAddress(fullAddress);
+            
+            resultDiv.innerHTML = `
+                <strong>Adresa completă:</strong> ${fullAddress}<br>
+                <strong>Adresa scurtă:</strong> ${shortAddress}
+            `;
+            resultDiv.style.display = 'block';
+            
+            console.log(`Test ${testNumber}:`, { fullAddress, shortAddress });
+        }
+
+        // Test automat la încărcarea paginii
+        window.onload = function() {
+            console.log('Test page loaded. Testing all cases...');
+            for (let i = 1; i <= 6; i++) {
+                setTimeout(() => testExtract(i), i * 200);
+            }
+        };
+    </script>
+</body>
+</html>

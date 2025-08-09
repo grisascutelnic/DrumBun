@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test CSS Inline</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f0f9ff;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .action-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 1);
+        }
+        
+        .action-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .action-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+            color: #374151;
+        }
+        
+        .driver-card .action-header h3 {
+            color: #10b981;
+        }
+        
+        .passenger-card .action-header h3 {
+            color: #3b82f6;
+        }
+        
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1rem;
+            background: #f9fafb;
+            border: none;
+            text-decoration: none;
+            width: 100%;
+            text-align: left;
+            color: #374151;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            background: #ffffff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .action-btn .btn-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn-primary .btn-icon {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .action-btn-secondary .btn-icon {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+        
+        .btn-content {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .btn-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+        
+        .btn-subtitle {
+            font-size: 1rem;
+            color: #6b7280;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Test CSS Inline - Butoanele Ar Trebui Să Arate Frumos</h1>
+        
+        <div class="action-card driver-card">
+            <div class="action-header">
+                <h3>Ești șofer?</h3>
+            </div>
+            <a href="/add-ride" class="action-btn action-btn-primary">
+                <div class="btn-icon">
+                    🚗
+                </div>
+                <div class="btn-content">
+                    <span class="btn-title">Crează o cursă</span>
+                    <span class="btn-subtitle">Împărtășește drumul tău și economisește</span>
+                </div>
+            </a>
+        </div>
+        
+        <div class="action-card passenger-card">
+            <div class="action-header">
+                <h3>Ești pasager/călător?</h3>
+            </div>
+            <a href="/rides" class="action-btn action-btn-secondary">
+                <div class="btn-icon">
+                    🔍
+                </div>
+                <div class="btn-content">
+                    <span class="btn-title">Caută o cursă</span>
+                    <span class="btn-subtitle">Găsește călătoria perfectă pentru tine</span>
+                </div>
+            </a>
+        </div>
+        
+        <p><strong>Dacă vezi butoanele frumoase de mai sus, problema este cu CSS-ul extern.</strong></p>
+        <p><strong>Dacă nu vezi stilurile, problema este cu browserul sau cu HTML-ul.</strong></p>
+    </div>
+</body>
+</html>
