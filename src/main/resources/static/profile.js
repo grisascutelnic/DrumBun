@@ -373,7 +373,7 @@ function createRideElement(ride) {
             </div>
             <div class="user-ride-detail">
                 <i class="fas fa-money-bill"></i>
-                <span class="user-ride-price">${ride.price} RON</span>
+                                        <span class="user-ride-price">${ride.price} MDL</span>
             </div>
         </div>
         ${ride.description ? `<div class="ride-description">${ride.description}</div>` : ''}

@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeHamburgerMenu();
     initializeAddRideButton();
     initializeRidesPageAutocomplete();
+    initializeModernCalendar();
 });
 
 // Inițializarea contoarelor pentru pasageri și colete
@@ -181,4 +182,42 @@ function showNotification(message, type = 'info') {
             notification.remove();
         }
     }, 5000);
+}
+
+// Inițializarea calendarului modern cu Flatpickr pentru pagina principală
+function initializeModernCalendar() {
+    // Calendar pentru data călătoriei în formularul de căutare
+    const travelDateInput = document.getElementById('travel-date');
+    
+    if (travelDateInput) {
+        flatpickr(travelDateInput, {
+            dateFormat: "Y-m-d",
+            locale: "ro",
+            minDate: "today",
+            maxDate: new Date().fp_incr(365), // Până la un an în viitor
+            disableMobile: false,
+            allowInput: true,
+            clickOpens: true,
+            theme: "material_blue",
+            onChange: function(selectedDates, dateStr, instance) {
+                if (selectedDates.length > 0) {
+                    console.log('Travel date selected:', dateStr);
+                }
+            },
+            onReady: function(selectedDates, dateStr, instance) {
+                // Adăugăm iconița de calendar
+                const calendarIcon = document.createElement('i');
+                calendarIcon.className = 'fas fa-calendar-alt calendar-icon';
+                calendarIcon.style.cssText = 'position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #10b981; pointer-events: none; z-index: 10;';
+                
+                const inputWrapper = travelDateInput.parentElement;
+                if (inputWrapper) {
+                    inputWrapper.style.position = 'relative';
+                    inputWrapper.appendChild(calendarIcon);
+                }
+            }
+        });
+        
+        console.log('Modern calendar initialized for main page travel date');
+    }
 }

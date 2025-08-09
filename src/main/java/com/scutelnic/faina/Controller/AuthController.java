@@ -16,6 +16,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
+import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -26,12 +28,17 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest loginRequest, HttpSession session) {
+        System.out.println("Login attempt for email: " + loginRequest.getEmail());
+        
         AuthResponse response = userService.login(loginRequest);
         if (response.isSuccess()) {
             // Store user in session
             session.setAttribute("user", response.getUser());
+            System.out.println("User logged in successfully: " + response.getUser().getEmail());
+            System.out.println("Session ID: " + session.getId());
             return ResponseEntity.ok(response);
         } else {
+            System.out.println("Login failed: " + response.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
     }
@@ -101,11 +108,46 @@ public class AuthController {
 
     @GetMapping("/user")
     public ResponseEntity<User> getCurrentUser(HttpSession session) {
+        System.out.println("Checking current user for session: " + session.getId());
         User user = (User) session.getAttribute("user");
         if (user != null) {
+            System.out.println("User found in session: " + user.getEmail());
             return ResponseEntity.ok(user);
         } else {
+            System.out.println("No user found in session");
             return ResponseEntity.notFound().build();
         }
+    }
+    
+    @GetMapping("/check")
+    public ResponseEntity<Map<String, Object>> checkAuth(HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        User user = (User) session.getAttribute("user");
+        
+        if (user != null) {
+            response.put("authenticated", true);
+            response.put("user", user);
+            response.put("sessionId", session.getId());
+        } else {
+            response.put("authenticated", false);
+            response.put("sessionId", session.getId());
+        }
+        
+        return ResponseEntity.ok(response);
+    }
+    
+    @GetMapping("/test")
+    public ResponseEntity<Map<String, Object>> testAuth() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Authentication system is working");
+        response.put("timestamp", System.currentTimeMillis());
+        return ResponseEntity.ok(response);
+    }
+    
+    @GetMapping("/test-db")
+    public ResponseEntity<Map<String, Object>> testDatabase() {
+        Map<String, Object> result = userService.testDatabaseConnection();
+        return ResponseEntity.ok(result);
     }
 }

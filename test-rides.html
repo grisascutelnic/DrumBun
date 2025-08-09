@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Rides - HaiDavai</title>
+    <link rel="stylesheet" href="src/main/resources/static/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="rides-container">
+        <div class="rides-header">
+            <h1>Călătorii Disponibile</h1>
+            <p>Găsește călătoria perfectă pentru tine</p>
+        </div>
+
+        <!-- Filtre -->
+        <div class="filters-section">
+            <div class="filter-group">
+                <label for="filter-from">De la:</label>
+                <div class="location-input-container">
+                    <input type="text" id="filter-from" placeholder="Orice localitate">
+                    <div id="filter-from-suggestions" class="suggestions-dropdown"></div>
+                </div>
+            </div>
+            <div class="filter-group">
+                <label for="filter-to">Până la:</label>
+                <div class="location-input-container">
+                    <input type="text" id="filter-to" placeholder="Orice localitate">
+                    <div id="filter-to-suggestions" class="suggestions-dropdown"></div>
+                </div>
+            </div>
+            <div class="filter-group">
+                <label for="filter-date">Data:</label>
+                <input type="date" id="filter-date">
+            </div>
+            <button class="filter-btn" id="filter-btn">
+                <i class="fas fa-filter"></i>
+                Filtrează
+            </button>
+        </div>
+
+        <!-- Lista de curse -->
+        <div class="rides-list" id="rides-list">
+            <!-- Cursele vor fi încărcate dinamic aici -->
+            <div class="no-rides">
+                <i class="fas fa-spinner fa-spin"></i>
+                <h3>Se încarcă cursele...</h3>
+                <p>Vă rugăm să așteptați.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="src/main/resources/static/rides.js"></script>
+    
+    <script>
+        // Test direct al API-ului
+        console.log('Testing API directly...');
+        
+        // Test 1: Test connection
+        fetch('/api/rides/test')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Test connection result:', data);
+            })
+            .catch(error => {
+                console.error('Test connection error:', error);
+            });
+        
+        // Test 2: Get all rides
+        fetch('/api/rides')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Get all rides result:', data);
+            })
+            .catch(error => {
+                console.error('Get all rides error:', error);
+            });
+    </script>
+</body>
+</html>

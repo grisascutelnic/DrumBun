@@ -38,6 +38,13 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch (error) {
         console.error('Error setting default date:', error);
     }
+    
+    try {
+        initializeModernCalendar();
+        console.log('Modern calendar initialized');
+    } catch (error) {
+        console.error('Error initializing modern calendar:', error);
+    }
 });
 
 // Funcție pentru verificarea autentificării
@@ -390,7 +397,7 @@ function generatePreviewHTML(data) {
                 <p><strong>Data:</strong> ${data.travelDate}</p>
                 <p><strong>Ora plecării:</strong> ${data.departureTime}</p>
                 <p><strong>Locuri disponibile:</strong> ${data.availableSeats}</p>
-                <p><strong>Preț per loc:</strong> ${data.price} RON</p>
+                                            <p><strong>Preț per loc:</strong> ${data.price} MDL</p>
             </div>
             
             ${data.description ? `
@@ -449,3 +456,78 @@ document.addEventListener('keydown', function(e) {
         closeModal();
     }
 });
+
+// Inițializarea calendarului modern cu Flatpickr pentru data și ora
+function initializeModernCalendar() {
+    // Calendar pentru data călătoriei
+    const travelDateInput = document.getElementById('travel-date');
+    if (travelDateInput) {
+        flatpickr(travelDateInput, {
+            dateFormat: "Y-m-d",
+            locale: "ro",
+            minDate: "today",
+            maxDate: new Date().fp_incr(365), // Până la un an în viitor
+            disableMobile: false,
+            allowInput: true,
+            clickOpens: true,
+            theme: "material_blue",
+            onChange: function(selectedDates, dateStr, instance) {
+                // Actualizăm data implicită când se schimbă
+                if (selectedDates.length > 0) {
+                    console.log('Travel date selected:', dateStr);
+                }
+            },
+            onReady: function(selectedDates, dateStr, instance) {
+                // Adăugăm iconița de calendar
+                const calendarIcon = document.createElement('i');
+                calendarIcon.className = 'fas fa-calendar-alt calendar-icon';
+                calendarIcon.style.cssText = 'position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #10b981; pointer-events: none; z-index: 10;';
+                
+                const inputWrapper = travelDateInput.parentElement;
+                if (inputWrapper) {
+                    inputWrapper.style.position = 'relative';
+                    inputWrapper.appendChild(calendarIcon);
+                }
+            }
+        });
+        
+        console.log('Modern calendar initialized for travel date');
+    }
+    
+    // Time picker pentru ora plecării
+    const departureTimeInput = document.getElementById('departure-time');
+    if (departureTimeInput) {
+        flatpickr(departureTimeInput, {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+            locale: "ro",
+            minTime: "00:00",
+            maxTime: "23:59",
+            disableMobile: false,
+            allowInput: true,
+            clickOpens: true,
+            theme: "material_blue",
+            onChange: function(selectedDates, timeStr, instance) {
+                if (selectedDates.length > 0) {
+                    console.log('Departure time selected:', timeStr);
+                }
+            },
+            onReady: function(selectedDates, timeStr, instance) {
+                // Adăugăm iconița de ceas
+                const clockIcon = document.createElement('i');
+                clockIcon.className = 'fas fa-clock calendar-icon';
+                clockIcon.style.cssText = 'position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #10b981; pointer-events: none; z-index: 10;';
+                
+                const inputWrapper = departureTimeInput.parentElement;
+                if (inputWrapper) {
+                    inputWrapper.style.position = 'relative';
+                    inputWrapper.appendChild(clockIcon);
+                }
+            }
+        });
+        
+        console.log('Modern time picker initialized for departure time');
+    }
+}

@@ -20,12 +20,28 @@ function initializeRidesPage() {
     
     // Adăugăm event listener pentru filtrare
     initializeFiltering();
+    
+    // Încărcăm toate cursele disponibile la inițializare
+    loadAllRides();
 }
 
 // Inițializarea autocomplete pentru filtre
 function initializeFilterAutocomplete() {
-    // Această funcție este gestionată de autocomplete.js
-    console.log('Filter autocomplete initialized by autocomplete.js');
+    // Inițializăm autocomplete-ul global
+    if (typeof initializeGlobalAutocomplete === 'function') {
+        initializeGlobalAutocomplete();
+    } else {
+        console.log('Global autocomplete function not available, skipping...');
+    }
+    
+    // Verificăm dacă elementele de filtrare există
+    const filterFrom = document.getElementById('filter-from');
+    const filterTo = document.getElementById('filter-to');
+    
+    if (!filterFrom || !filterTo) {
+        console.log('Filter elements not found, skipping autocomplete initialization');
+        return;
+    }
 }
 
 // Inițializarea acțiunilor pentru curse
@@ -35,19 +51,25 @@ function initializeRideActions() {
         if (e.target.closest('.btn-reserve')) {
             const button = e.target.closest('.btn-reserve');
             const rideId = button.getAttribute('data-ride-id');
-            handleReservation(rideId);
+            if (rideId) {
+                handleReservation(rideId);
+            }
         }
         
         if (e.target.closest('.btn-details')) {
             const button = e.target.closest('.btn-details');
             const rideId = button.getAttribute('data-ride-id');
-            showRideDetails(rideId);
+            if (rideId) {
+                showRideDetails(rideId);
+            }
         }
         
         if (e.target.closest('.user-profile-link')) {
             const link = e.target.closest('.user-profile-link');
             const userId = link.getAttribute('data-user-id');
-            navigateToUserProfile(userId);
+            if (userId) {
+                navigateToUserProfile(userId);
+            }
         }
     });
 }
@@ -57,6 +79,15 @@ function initializeFiltering() {
     const filterBtn = document.getElementById('filter-btn');
     if (filterBtn) {
         filterBtn.addEventListener('click', function() {
+            applyFilters();
+        });
+    }
+    
+    // Adăugăm event listener pentru formularul de căutare
+    const searchForm = document.querySelector('.search-form');
+    if (searchForm) {
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
             applyFilters();
         });
     }
@@ -101,9 +132,9 @@ function navigateToUserProfile(userId) {
 
 // Aplicarea filtrelor
 function applyFilters() {
-    const fromLocation = document.getElementById('filter-from').value;
-    const toLocation = document.getElementById('filter-to').value;
-    const travelDate = document.getElementById('filter-date').value;
+    const fromLocation = document.getElementById('filter-from')?.value || '';
+    const toLocation = document.getElementById('filter-to')?.value || '';
+    const travelDate = document.getElementById('filter-date')?.value || '';
     
     // Construim URL-ul pentru căutare
     const params = new URLSearchParams();
@@ -111,9 +142,9 @@ function applyFilters() {
     if (toLocation) params.append('toLocation', toLocation);
     if (travelDate) params.append('travelDate', travelDate);
     
-    // Facem request către API
+    // Facem request către API cu GET method
     fetch(`/api/rides/search?${params.toString()}`, {
-        method: 'POST'
+        method: 'GET'
     })
     .then(response => response.json())
     .then(data => {
@@ -131,24 +162,40 @@ function applyFilters() {
 
 // Actualizarea listei de curse
 function updateRidesList(rides) {
-    const ridesList = document.getElementById('rides-list');
+    console.log('Updating rides list with:', rides);
     
-    if (rides.length === 0) {
+    const ridesList = document.getElementById('rides-list');
+    console.log('Found rides list element:', ridesList);
+    
+    if (!ridesList) {
+        console.error('Element rides-list not found in DOM');
+        return;
+    }
+    
+    if (!rides || rides.length === 0) {
+        console.log('No rides to display, showing empty state');
         ridesList.innerHTML = `
             <div class="no-rides">
                 <i class="fas fa-search"></i>
-                <h3>Nu există curse disponibile</h3>
+                <h3>Nu sunt curse disponibile</h3>
                 <p>Încearcă să modifici filtrele sau să revii mai târziu.</p>
             </div>
         `;
         return;
     }
     
-    ridesList.innerHTML = rides.map(ride => generateRideCardHTML(ride)).join('');
+    console.log('Generating HTML for', rides.length, 'rides');
+    const ridesHTML = rides.map(ride => generateRideCardHTML(ride)).join('');
+    console.log('Generated HTML length:', ridesHTML.length);
+    
+    ridesList.innerHTML = ridesHTML;
+    console.log('Updated rides list HTML');
 }
 
 // Generarea HTML-ului pentru o carte de cursă
 function generateRideCardHTML(ride) {
+    console.log('Generating HTML for ride:', ride);
+    
     const travelDate = new Date(ride.travelDate).toLocaleDateString('ro-RO', {
         day: '2-digit',
         month: 'short',
@@ -160,7 +207,10 @@ function generateRideCardHTML(ride) {
         minute: '2-digit'
     });
     
-    return `
+    console.log('Formatted travel date:', travelDate);
+    console.log('Formatted departure time:', departureTime);
+    
+    const html = `
         <div class="ride-card" data-ride-id="${ride.id}">
             <div class="ride-header">
                 <div class="ride-route">
@@ -177,7 +227,7 @@ function generateRideCardHTML(ride) {
                     </div>
                 </div>
                 <div class="ride-price">
-                    <span class="price">${ride.price} RON</span>
+                                            <span class="price">${ride.price} MDL</span>
                     <span class="per-seat">per loc</span>
                 </div>
             </div>
@@ -195,7 +245,7 @@ function generateRideCardHTML(ride) {
                         <i class="fas fa-users"></i>
                         <span>${ride.availableSeats} locuri disponibile</span>
                     </div>
-                    <div class="info-item user-profile-link" data-user-id="${ride.userId}">
+                    <div class="info-item user-profile-link" data-user-id="${ride.userId}" style="cursor: pointer;" onclick="navigateToUserProfile('${ride.userId}')">
                         <i class="fas fa-user"></i>
                         <span class="driver-name">${ride.driverName}</span>
                         <i class="fas fa-external-link-alt profile-link-icon"></i>
@@ -219,6 +269,9 @@ function generateRideCardHTML(ride) {
             ` : ''}
         </div>
     `;
+    
+    console.log('Generated HTML for ride', ride.id, ':', html.substring(0, 100) + '...');
+    return html;
 }
 
 // Funcția pentru afișarea notificărilor
@@ -252,4 +305,110 @@ function showNotification(message, type = 'info') {
             notification.remove();
         }
     }, 5000);
+}
+
+// Inițializarea calendarului modern cu Flatpickr
+function initializeModernCalendar() {
+    const dateInput = document.getElementById('filter-date');
+    
+    if (dateInput) {
+        // Configurare pentru calendarul de filtrare
+        flatpickr(dateInput, {
+            dateFormat: "Y-m-d",
+            locale: "ro",
+            minDate: "today",
+            maxDate: new Date().fp_incr(365), // Până la un an în viitor
+            disableMobile: false,
+            allowInput: true,
+            clickOpens: true,
+            theme: "material_blue",
+            onChange: function(selectedDates, dateStr, instance) {
+                // Aplicăm filtrele automat când se schimbă data
+                if (selectedDates.length > 0) {
+                    applyFilters();
+                }
+            },
+            onReady: function(selectedDates, dateStr, instance) {
+                // Adăugăm iconița de calendar
+                const calendarIcon = document.createElement('i');
+                calendarIcon.className = 'fas fa-calendar-alt calendar-icon';
+                calendarIcon.style.cssText = 'position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #10b981; pointer-events: none; z-index: 10;';
+                
+                const inputWrapper = dateInput.parentElement;
+                if (inputWrapper) {
+                    inputWrapper.style.position = 'relative';
+                    inputWrapper.appendChild(calendarIcon);
+                }
+            }
+        });
+        
+        console.log('Modern calendar initialized for filter date');
+    }
+}
+
+// Încărcarea tuturor curselor disponibile
+function loadAllRides() {
+    console.log('Starting to load all rides...');
+    
+    // Verificăm dacă elementul rides-list există
+    const ridesList = document.getElementById('rides-list');
+    if (!ridesList) {
+        console.error('Element rides-list not found in DOM');
+        return;
+    }
+    
+    // Mai întâi testăm conexiunea la baza de date
+    fetch('/api/rides/test')
+        .then(response => response.json())
+        .then(testData => {
+            console.log('Database test result:', testData);
+            if (!testData.success) {
+                throw new Error('Database connection failed: ' + testData.message);
+            }
+            
+            // Dacă testul a reușit, încărcăm cursele
+            return fetch('/api/rides');
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+            if (!response.ok) {
+                throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(rides => {
+            console.log('Successfully loaded rides:', rides);
+            console.log('Number of rides:', rides.length);
+            
+            if (!rides || rides.length === 0) {
+                // Nu sunt curse disponibile
+                ridesList.innerHTML = `
+                    <div class="no-rides">
+                        <i class="fas fa-search"></i>
+                        <h3>Nu sunt curse disponibile</h3>
+                        <p>Încearcă să modifici filtrele sau să revii mai târziu.</p>
+                    </div>
+                `;
+            } else {
+                updateRidesList(rides);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading rides:', error);
+            showNotification('Eroare la încărcarea curselor: ' + error.message, 'error');
+            // Afișăm mesajul de eroare în lista de curse
+            ridesList.innerHTML = `
+                <div class="no-rides">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Eroare la încărcarea curselor</h3>
+                    <p>${error.message}</p>
+                    <p>Vă rugăm să reîncercați mai târziu.</p>
+                    <button onclick="loadAllRides()" class="btn-retry">
+                        <i class="fas fa-redo"></i>
+                        Reîncearcă
+                    </button>
+                </div>
+            `;
+        });
 }

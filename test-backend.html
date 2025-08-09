@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Backend - Faina</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .result {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        pre {
+            background: #f1f1f1;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Backend - Faina</h1>
+    
+    <div class="test-section">
+        <h2>Test Autentificare</h2>
+        <button class="test-button" onclick="testAuth()">Test Auth System</button>
+        <button class="test-button" onclick="testAuthDB()">Test Auth Database</button>
+        <button class="test-button" onclick="testLogin()">Test Login</button>
+        <button class="test-button" onclick="testUser()">Test Current User</button>
+        <div id="auth-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Baza de Date</h2>
+        <button class="test-button" onclick="testDatabase()">Test Database Connection</button>
+        <button class="test-button" onclick="testRides()">Test Rides API</button>
+        <div id="database-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Sesiune</h2>
+        <button class="test-button" onclick="testSession()">Test Session</button>
+        <button class="test-button" onclick="clearSession()">Clear Session</button>
+        <div id="session-result"></div>
+    </div>
+
+    <script>
+        function showResult(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            const className = isError ? 'result error' : 'result success';
+            element.innerHTML = `
+                <div class="${className}">
+                    <h4>${isError ? 'Eroare' : 'Succes'}</h4>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                </div>
+            `;
+        }
+
+        function testAuth() {
+            fetch('/api/auth/test')
+                .then(response => response.json())
+                .then(data => {
+                    showResult('auth-result', data);
+                })
+                .catch(error => {
+                    showResult('auth-result', { error: error.message }, true);
+                });
+        }
+
+        function testAuthDB() {
+            fetch('/api/auth/test-db')
+                .then(response => response.json())
+                .then(data => {
+                    showResult('auth-result', data);
+                })
+                .catch(error => {
+                    showResult('auth-result', { error: error.message }, true);
+                });
+        }
+
+        function testLogin() {
+            const testData = {
+                email: 'test@example.com',
+                password: 'test123'
+            };
+            
+            fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(testData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                showResult('auth-result', data);
+            })
+            .catch(error => {
+                showResult('auth-result', { error: error.message }, true);
+            });
+        }
+
+        function testUser() {
+            fetch('/api/auth/user')
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        return { status: response.status, message: 'Not authenticated' };
+                    }
+                })
+                .then(data => {
+                    showResult('auth-result', data);
+                })
+                .catch(error => {
+                    showResult('auth-result', { error: error.message }, true);
+                });
+        }
+
+        function testDatabase() {
+            fetch('/api/rides/test')
+                .then(response => response.json())
+                .then(data => {
+                    showResult('database-result', data);
+                })
+                .catch(error => {
+                    showResult('database-result', { error: error.message }, true);
+                });
+        }
+
+        function testRides() {
+            fetch('/api/rides')
+                .then(response => response.json())
+                .then(data => {
+                    showResult('database-result', { 
+                        message: 'Rides loaded successfully',
+                        count: data.length,
+                        sample: data.slice(0, 2) // Show first 2 rides
+                    });
+                })
+                .catch(error => {
+                    showResult('database-result', { error: error.message }, true);
+                });
+        }
+
+        function testSession() {
+            fetch('/api/auth/check')
+                .then(response => response.json())
+                .then(data => {
+                    showResult('session-result', data);
+                })
+                .catch(error => {
+                    showResult('session-result', { error: error.message }, true);
+                });
+        }
+
+        function clearSession() {
+            fetch('/api/auth/logout', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                showResult('session-result', data);
+            })
+            .catch(error => {
+                showResult('session-result', { error: error.message }, true);
+            });
+        }
+    </script>
+</body>
+</html>

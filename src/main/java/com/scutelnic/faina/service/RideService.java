@@ -13,6 +13,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.time.ZoneId;
 
 @Service
 public class RideService {
@@ -21,19 +23,30 @@ public class RideService {
     private RideRepository rideRepository;
     
     public List<RideDTO> getAllActiveRides() {
-        // Curățăm automat cursele expirate
-        cleanupExpiredRides();
-        
-        LocalDateTime currentDate = LocalDateTime.now();
-        List<Ride> rides = rideRepository.findAllActiveRides(currentDate);
-        return rides.stream()
-                   .map(this::convertToDTO)
-                   .collect(Collectors.toList());
+        try {
+            System.out.println("Fetching all active rides from database...");
+            
+            // Nu curățăm automat cursele expirate aici pentru a nu afecta performanța
+            // cleanupExpiredRides() va fi apelată periodic sau când este necesar
+            
+            List<Ride> rides = rideRepository.findAllActiveRides();
+            System.out.println("Found " + rides.size() + " active rides in database");
+            
+            List<RideDTO> rideDTOs = rides.stream()
+                       .map(this::convertToDTO)
+                       .collect(Collectors.toList());
+            
+            System.out.println("Converted " + rideDTOs.size() + " rides to DTOs");
+            return rideDTOs;
+        } catch (Exception e) {
+            System.err.println("Error fetching rides: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
     
     public List<RideDTO> searchRides(SearchRideRequest request) {
-        // Curățăm automat cursele expirate
-        cleanupExpiredRides();
+        // Nu curățăm automat cursele expirate aici pentru a nu afecta performanța
         
         LocalDateTime travelDateTime = request.getTravelDate().atStartOfDay();
         
@@ -56,8 +69,7 @@ public class RideService {
     }
     
     public RideDTO addRide(AddRideRequest request, User user) {
-        // Curățăm automat cursele expirate
-        cleanupExpiredRides();
+        // Nu curățăm automat cursele expirate aici pentru a nu afecta performanța
         
         Ride ride = new Ride();
         ride.setFromLocation(request.getFromLocation());
@@ -74,8 +86,7 @@ public class RideService {
     }
     
     public RideDTO getRideById(Long id) {
-        // Curățăm automat cursele expirate
-        cleanupExpiredRides();
+        // Nu curățăm automat cursele expirate aici pentru a nu afecta performanța
         
         Ride ride = rideRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cursa nu a fost găsită"));
@@ -83,20 +94,17 @@ public class RideService {
     }
     
     public List<String> getAllFromLocations() {
-        // Curățăm automat cursele expirate
-        cleanupExpiredRides();
+        // Nu curățăm automat cursele expirate aici pentru a nu afecta performanța
         return rideRepository.findAllFromLocations();
     }
     
     public List<String> getAllToLocations() {
-        // Curățăm automat cursele expirate
-        cleanupExpiredRides();
+        // Nu curățăm automat cursele expirate aici pentru a nu afecta performanța
         return rideRepository.findAllToLocations();
     }
     
     public List<RideDTO> getRidesByUser(User user) {
-        // Curățăm automat cursele expirate
-        cleanupExpiredRides();
+        // Nu curățăm automat cursele expirate aici pentru a nu afecta performanța
         
         List<Ride> rides = rideRepository.findByUserOrderByCreatedAtDesc(user);
         return rides.stream()
@@ -105,8 +113,7 @@ public class RideService {
     }
     
     public List<RideDTO> getRidesByUserId(Long userId) {
-        // Curățăm automat cursele expirate
-        cleanupExpiredRides();
+        // Nu curățăm automat cursele expirate aici pentru a nu afecta performanța
         
         List<Ride> rides = rideRepository.findByUserIdOrderByCreatedAtDesc(userId);
         return rides.stream()
@@ -115,8 +122,7 @@ public class RideService {
     }
     
     public List<RideDTO> getTop5RecentRides() {
-        // Curățăm automat cursele expirate
-        cleanupExpiredRides();
+        // Nu curățăm automat cursele expirate aici pentru a nu afecta performanța
         
         List<Ride> rides = rideRepository.findTop5RecentRides();
         return rides.stream()
@@ -126,22 +132,50 @@ public class RideService {
     }
     
     /**
-     * Curăță automat cursele care au trecut data de călătorie
+     * Curăță automat cursele care au trecut data de călătorie + 1 zi
+     * Folosește timpul din Moldova (Europe/Chisinau)
+     * Această metodă trebuie apelată periodic, nu la fiecare cerere
      */
     public void cleanupExpiredRides() {
-        LocalDateTime currentDateTime = LocalDateTime.now();
-        List<Ride> expiredRides = rideRepository.findExpiredRides(currentDateTime);
+        // Folosim timpul din Moldova
+        ZoneId moldovaZone = ZoneId.of("Europe/Chisinau");
+        LocalDateTime currentDateTime = LocalDateTime.now(moldovaZone);
+        
+        // Găsim toate cursele active
+        List<Ride> activeRides = rideRepository.findAll().stream()
+                .filter(Ride::getIsActive)
+                .collect(Collectors.toList());
+        
+        List<Ride> expiredRides = new ArrayList<>();
+        
+        for (Ride ride : activeRides) {
+            // Verificăm dacă a trecut mai mult de 1 zi de la data și ora cursei
+            // ride.getTravelDate() conține deja data și ora de plecare
+            if (currentDateTime.isAfter(ride.getTravelDate().plusDays(1))) {
+                expiredRides.add(ride);
+            }
+        }
         
         if (!expiredRides.isEmpty()) {
             // Setăm cursele ca inactive în loc să le ștergem
             expiredRides.forEach(ride -> ride.setIsActive(false));
             rideRepository.saveAll(expiredRides);
+            System.out.println("Curse expirate setate ca inactive: " + expiredRides.size());
         }
     }
     
+    /**
+     * Curăță cursele expirate doar dacă este necesar (la intervale mari)
+     * Această metodă poate fi apelată la fiecare cerere fără să afecteze performanța
+     */
+    private void cleanupExpiredRidesIfNeeded() {
+        // Curățăm cursele expirate doar o dată la 100 de cereri sau la intervale mari
+        // Pentru moment, nu curățăm automat
+        // cleanupExpiredRides() va fi apelată periodic de un scheduler
+    }
+    
     public void deleteRide(Long rideId, User user) {
-        // Curățăm automat cursele expirate
-        cleanupExpiredRides();
+        // Nu curățăm automat cursele expirate aici pentru a nu afecta performanța
         
         Ride ride = rideRepository.findById(rideId)
                 .orElseThrow(() -> new RuntimeException("Cursa nu a fost găsită"));
@@ -156,7 +190,32 @@ public class RideService {
     }
     
     private RideDTO convertToDTO(Ride ride) {
+        if (ride == null) {
+            return null;
+        }
+        
         User user = ride.getUser();
+        if (user == null) {
+            // Dacă user-ul este null, returnăm un DTO cu informații minime
+            return new RideDTO(
+                ride.getId(),
+                ride.getFromLocation(),
+                ride.getToLocation(),
+                ride.getDepartureTime(),
+                ride.getTravelDate(),
+                ride.getAvailableSeats(),
+                ride.getPrice(),
+                ride.getDescription(),
+                null,
+                "Utilizator necunoscut",
+                "N/A",
+                "N/A",
+                null,
+                ride.getCreatedAt(),
+                ride.getIsActive()
+            );
+        }
+        
         return new RideDTO(
             ride.getId(),
             ride.getFromLocation(),

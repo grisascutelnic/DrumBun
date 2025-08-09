@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -17,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Controller
 public class PageController {
@@ -47,9 +49,60 @@ public class PageController {
     }
     
     @GetMapping("/rides")
-    public String rides(Model model) {
-        List<RideDTO> rides = rideService.getAllActiveRides();
-        model.addAttribute("rides", rides);
+    public String rides(
+            @RequestParam(required = false) String from,
+            @RequestParam(required = false) String to,
+            @RequestParam(required = false) String date,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Model model) {
+        try {
+            // Filtrare și paginare
+            List<RideDTO> allRides = rideService.getAllActiveRides();
+            
+            // Filtrare
+            List<RideDTO> filteredRides = allRides.stream()
+                .filter(ride -> from == null || from.isEmpty() || 
+                        ride.getFromLocation().toLowerCase().contains(from.toLowerCase()))
+                .filter(ride -> to == null || to.isEmpty() || 
+                        ride.getToLocation().toLowerCase().contains(to.toLowerCase()))
+                .filter(ride -> date == null || date.isEmpty() || 
+                        ride.getTravelDate().toString().equals(date))
+                .collect(Collectors.toList());
+            
+            // Paginare
+            int totalRides = filteredRides.size();
+            int totalPages = (int) Math.ceil((double) totalRides / size);
+            int startIndex = page * size;
+            int endIndex = Math.min(startIndex + size, totalRides);
+            
+            List<RideDTO> pagedRides = filteredRides.subList(startIndex, endIndex);
+            
+            // Adăugăm atributele în model
+            model.addAttribute("allRides", pagedRides);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("totalRides", totalRides);
+            model.addAttribute("hasNextPage", page < totalPages - 1);
+            model.addAttribute("hasPreviousPage", page > 0);
+            
+            // Pentru filtre
+            model.addAttribute("filterFrom", from != null ? from : "");
+            model.addAttribute("filterTo", to != null ? to : "");
+            model.addAttribute("filterDate", date != null ? date : "");
+            
+        } catch (Exception e) {
+            // Dacă apare o eroare, setăm o listă goală pentru a evita eroarea
+            model.addAttribute("allRides", new ArrayList<>());
+            model.addAttribute("currentPage", 0);
+            model.addAttribute("totalPages", 0);
+            model.addAttribute("totalRides", 0);
+            model.addAttribute("hasNextPage", false);
+            model.addAttribute("hasPreviousPage", false);
+            model.addAttribute("filterFrom", "");
+            model.addAttribute("filterTo", "");
+            model.addAttribute("filterDate", "");
+        }
         return "rides";
     }
     

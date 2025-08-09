@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Rides Responsive - HaiDavai</title>
+    <link rel="stylesheet" href="src/main/resources/static/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #f0f9ff;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .test-title {
+            text-align: center;
+            color: #1e40af;
+            margin-bottom: 2rem;
+        }
+        
+        .responsive-test {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .responsive-test h3 {
+            color: #374151;
+            margin-bottom: 1rem;
+        }
+        
+        .responsive-test p {
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+        
+        .device-info {
+            background: #f3f4f6;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">Test Responsive Design - Rides Search Container</h1>
+        
+        <div class="responsive-test">
+            <h3>Desktop View (>1024px)</h3>
+            <p>Search fields are displayed in a row with proper spacing</p>
+            <p>Buttons are aligned horizontally next to each other</p>
+            <div class="device-info">Width: >1024px | Layout: Horizontal row</div>
+        </div>
+        
+        <div class="responsive-test">
+            <h3>Tablet View (768px - 1024px)</h3>
+            <p>Search fields maintain horizontal layout but with reduced spacing</p>
+            <p>Buttons remain side by side with adjusted sizing</p>
+            <div class="device-info">Width: 768px - 1024px | Layout: Compact horizontal</div>
+        </div>
+        
+        <div class="responsive-test">
+            <h3>Mobile View (<768px)</h3>
+            <p>Search fields stack vertically for better mobile experience</p>
+            <p>Buttons stack vertically and take full width</p>
+            <div class="device-info">Width: <768px | Layout: Vertical stack</div>
+        </div>
+        
+        <div class="responsive-test">
+            <h3>Small Mobile View (<480px)</h3>
+            <p>Optimized spacing and padding for very small screens</p>
+            <p>All elements maintain proper touch targets</p>
+            <div class="device-info">Width: <480px | Layout: Compact vertical</div>
+        </div>
+        
+        <!-- Actual Search Container for Testing -->
+        <section class="search-section">
+            <div class="container">
+                <form method="GET" action="/rides" class="search-form">
+                    <div class="search-fields">
+                        <div class="search-field">
+                            <label for="filter-from">De la</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="filter-from" name="from" placeholder="Orice localitate">
+                            </div>
+                        </div>
+                        
+                        <div class="search-field">
+                            <label for="filter-to">Până la</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="filter-to" name="to" placeholder="Orice localitate">
+                            </div>
+                        </div>
+                        
+                        <div class="search-field date-field">
+                            <label for="filter-date">Data</label>
+                            <input type="date" id="filter-date" name="date">
+                        </div>
+                        
+                        <div class="search-actions-main">
+                            <button type="submit" class="search-btn">
+                                <i class="fas fa-search"></i>
+                                Caută
+                            </button>
+                            
+                            <a href="/rides" class="clear-link">
+                                <i class="fas fa-times"></i>
+                                Curăță filtrele
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+        
+        <div class="responsive-test">
+            <h3>Instructions for Testing</h3>
+            <p>1. Resize your browser window to test different screen sizes</p>
+            <p>2. Use browser dev tools to simulate different devices</p>
+            <p>3. Test on actual mobile and tablet devices</p>
+            <p>4. Verify that buttons are properly aligned at all sizes</p>
+            <p>5. Check that the clear filters button is not awkwardly positioned</p>
+        </div>
+    </div>
+</body>
+</html>

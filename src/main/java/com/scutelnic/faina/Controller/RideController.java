@@ -10,9 +10,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpSession;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/api/rides")
@@ -23,8 +25,34 @@ public class RideController {
     
     @GetMapping
     public ResponseEntity<List<RideDTO>> getAllRides() {
-        List<RideDTO> rides = rideService.getAllActiveRides();
-        return ResponseEntity.ok(rides);
+        try {
+            System.out.println("API call to get all rides");
+            List<RideDTO> rides = rideService.getAllActiveRides();
+            System.out.println("Returning " + rides.size() + " rides");
+            return ResponseEntity.ok(rides);
+        } catch (Exception e) {
+            System.err.println("Error in getAllRides: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).build();
+        }
+    }
+    
+    @GetMapping("/test")
+    public ResponseEntity<Map<String, Object>> testConnection() {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            List<RideDTO> rides = rideService.getAllActiveRides();
+            response.put("success", true);
+            response.put("message", "Database connection successful");
+            response.put("ridesCount", rides.size());
+            response.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Database connection failed: " + e.getMessage());
+            response.put("timestamp", System.currentTimeMillis());
+            return ResponseEntity.status(500).body(response);
+        }
     }
     
     @GetMapping("/{id}")
@@ -37,7 +65,7 @@ public class RideController {
         }
     }
     
-    @PostMapping("/search")
+    @GetMapping("/search")
     public ResponseEntity<Map<String, Object>> searchRides(
             @RequestParam String fromLocation,
             @RequestParam String toLocation,
@@ -95,9 +123,9 @@ public class RideController {
             request.setFromLocation(fromLocation);
             request.setToLocation(toLocation);
             request.setTravelDate(LocalDate.parse(travelDate));
-            request.setDepartureTime(java.time.LocalTime.parse(departureTime));
+            request.setDepartureTime(LocalTime.parse(departureTime));
             request.setAvailableSeats(availableSeats);
-            request.setPrice(java.math.BigDecimal.valueOf(price));
+            request.setPrice(BigDecimal.valueOf(price));
             request.setDescription(description);
             
             RideDTO savedRide = rideService.addRide(request, user);

@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.Map;
+import java.util.HashMap;
 
 @Service
 public class UserService {
@@ -133,7 +135,8 @@ public class UserService {
         }
         
         User user = userOpt.get();
-        if (!Objects.equals(user.getPassword(), loginRequest.getPassword())) {
+        // Verificăm parola (pentru moment, direct comparare - în producție ar trebui hash)
+        if (!user.getPassword().equals(loginRequest.getPassword())) {
             return new AuthResponse(false, "Email sau parolă incorectă");
         }
         
@@ -161,5 +164,22 @@ public class UserService {
         
         User savedUser = userRepository.save(newUser);
         return new AuthResponse(true, "Contul a fost creat cu succes", savedUser);
+    }
+    
+    public Map<String, Object> testDatabaseConnection() {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            long userCount = userRepository.count();
+            result.put("success", true);
+            result.put("message", "Database connection successful");
+            result.put("userCount", userCount);
+            result.put("timestamp", System.currentTimeMillis());
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", "Database connection failed: " + e.getMessage());
+            result.put("timestamp", System.currentTimeMillis());
+            e.printStackTrace();
+        }
+        return result;
     }
 }

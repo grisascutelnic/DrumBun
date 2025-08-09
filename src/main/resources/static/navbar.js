@@ -3,18 +3,24 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function checkAuthStatus() {
+    console.log('Checking authentication status...');
+    
     fetch('/api/auth/user')
         .then(response => {
+            console.log('Auth check response status:', response.status);
             if (response.ok) {
                 return response.json();
             } else {
+                console.log('User not authenticated, status:', response.status);
                 return null;
             }
         })
         .then(user => {
             if (user) {
+                console.log('User authenticated:', user.email);
                 updateNavbarForLoggedInUser(user);
             } else {
+                console.log('No authenticated user found');
                 updateNavbarForLoggedOutUser();
             }
         })
