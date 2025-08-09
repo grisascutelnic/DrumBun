@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.ArrayList;
 
 @Controller
 public class PageController {
@@ -25,8 +26,13 @@ public class PageController {
     
     @GetMapping("/")
     public String index(Model model) {
-        List<RideDTO> recentRides = rideService.getTop5RecentRides();
-        model.addAttribute("recentRides", recentRides);
+        try {
+            List<RideDTO> recentRides = rideService.getTop5RecentRides();
+            model.addAttribute("recentRides", recentRides);
+        } catch (Exception e) {
+            // Dacă apare o eroare, setăm o listă goală pentru a evita eroarea
+            model.addAttribute("recentRides", new ArrayList<>());
+        }
         return "index";
     }
     

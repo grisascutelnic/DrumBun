@@ -91,10 +91,33 @@ function initializeAddRideButton() {
     const addRideBtn = document.querySelector('.add-ride-btn');
     
     if (addRideBtn) {
-        addRideBtn.addEventListener('click', function() {
-            window.location.href = '/add-ride';
+        addRideBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            checkAuthAndRedirect();
         });
     }
+}
+
+// Funcție pentru verificarea autentificării și redirecționare
+function checkAuthAndRedirect() {
+    fetch('/api/auth/user')
+        .then(response => {
+            if (response.ok) {
+                // User is logged in, redirect to add-ride page
+                window.location.href = '/add-ride';
+            } else {
+                // User is not logged in, redirect to login page
+                // Save the target URL in sessionStorage for redirection after login
+                sessionStorage.setItem('redirectAfterLogin', '/add-ride');
+                window.location.href = '/login';
+            }
+        })
+        .catch(error => {
+            console.error('Error checking auth status:', error);
+            // On error, redirect to login page for safety
+            sessionStorage.setItem('redirectAfterLogin', '/add-ride');
+            window.location.href = '/login';
+        });
 }
 
 // Efectuarea căutării

@@ -31,7 +31,7 @@
                                 <div class="action-header">
                                     <h3>Ești șofer?</h3>
                                 </div>
-                                <a href="/add-ride" class="action-btn action-btn-primary">
+                                <a href="#" class="action-btn action-btn-primary" id="create-ride-btn" onclick="handleCreateRideClick(event)">
                                     <div class="btn-icon">
                                         <i class="fas fa-car"></i>
                                     </div>
@@ -44,7 +44,7 @@
                             
                             <div class="action-card passenger-card">
                                 <div class="action-header">
-                                    <h3>Ești pasager/călător?</h3>
+                                    <h3>Ești pasager?</h3>
                                 </div>
                                 <a href="/rides" class="action-btn action-btn-secondary">
                                     <div class="btn-icon">
@@ -187,6 +187,38 @@
                 }
             }
         })();
+
+        // Funcție pentru gestionarea click-ului pe butonul "Crează o cursă"
+        function handleCreateRideClick(event) {
+            event.preventDefault();
+            
+            // Verificăm dacă utilizatorul este logat
+            fetch('/api/auth/user')
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        return null;
+                    }
+                })
+                .then(user => {
+                    if (user) {
+                        // Utilizatorul este logat, redirecționăm la pagina de adăugare cursă
+                        window.location.href = '/add-ride';
+                    } else {
+                        // Utilizatorul nu este logat, redirecționăm la pagina de logare
+                        // Salvăm URL-ul curent pentru a reveni după logare
+                        sessionStorage.setItem('redirectAfterLogin', '/add-ride');
+                        window.location.href = '/login';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking auth status:', error);
+                    // În caz de eroare, redirecționăm la logare
+                    sessionStorage.setItem('redirectAfterLogin', '/add-ride');
+                    window.location.href = '/login';
+                });
+        }
     </script>
 </body>
 </html>

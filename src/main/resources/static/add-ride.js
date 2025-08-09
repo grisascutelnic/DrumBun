@@ -8,6 +8,9 @@ let currentFormData = {};
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Add-ride page loaded, initializing...');
     
+    // Verificăm dacă utilizatorul este autentificat
+    checkAuthentication();
+    
     try {
         initializeMap();
         console.log('Map initialized');
@@ -36,6 +39,32 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Error setting default date:', error);
     }
 });
+
+// Funcție pentru verificarea autentificării
+function checkAuthentication() {
+    fetch('/api/auth/user')
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                return null;
+            }
+        })
+        .then(user => {
+            if (!user) {
+                // Utilizatorul nu este autentificat, redirecționăm la logare
+                // Salvăm URL-ul curent pentru a reveni după logare
+                sessionStorage.setItem('redirectAfterLogin', '/add-ride');
+                window.location.href = '/login';
+            }
+        })
+        .catch(error => {
+            console.error('Error checking auth status:', error);
+            // În caz de eroare, redirecționăm la logare
+            sessionStorage.setItem('redirectAfterLogin', '/add-ride');
+            window.location.href = '/login';
+        });
+}
 
 // Inițializarea hărții
 function initializeMap() {

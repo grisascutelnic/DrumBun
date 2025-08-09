@@ -59,9 +59,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (typeof checkAuthStatus === 'function') {
                         checkAuthStatus();
                     }
+                    
+                    // Check for redirectAfterLogin in sessionStorage
+                    const redirectAfterLogin = sessionStorage.getItem('redirectAfterLogin');
+                    
                     // Redirect to home page after successful registration
                     setTimeout(() => {
-                        window.location.href = '/';
+                        if (redirectAfterLogin) {
+                            // Clear the stored redirect and redirect to the stored URL
+                            sessionStorage.removeItem('redirectAfterLogin');
+                            window.location.href = redirectAfterLogin;
+                        } else {
+                            window.location.href = '/';
+                        }
                     }, 1500);
                 } else {
                     showNotification(data.message, 'error');

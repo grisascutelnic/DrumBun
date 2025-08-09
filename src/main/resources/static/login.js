@@ -40,14 +40,19 @@ document.addEventListener('DOMContentLoaded', function() {
                         checkAuthStatus();
                     }
                     
-                    // Check for redirect parameter
+                    // Check for redirect parameter and sessionStorage
                     const urlParams = new URLSearchParams(window.location.search);
                     const redirectTo = urlParams.get('redirect');
+                    const redirectAfterLogin = sessionStorage.getItem('redirectAfterLogin');
                     
                     // Redirect after successful login
                     setTimeout(() => {
                         if (redirectTo) {
                             window.location.href = redirectTo;
+                        } else if (redirectAfterLogin) {
+                            // Clear the stored redirect and redirect to the stored URL
+                            sessionStorage.removeItem('redirectAfterLogin');
+                            window.location.href = redirectAfterLogin;
                         } else {
                             window.location.href = '/';
                         }

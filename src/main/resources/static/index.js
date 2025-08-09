@@ -16,13 +16,16 @@ function checkAuthAndRedirect() {
                 // User is logged in, redirect to add-ride page
                 window.location.href = '/add-ride';
             } else {
-                // User is not logged in, redirect to login page with redirect parameter
-                window.location.href = '/login?redirect=/rides';
+                // User is not logged in, redirect to login page
+                // Save the target URL in sessionStorage for redirection after login
+                sessionStorage.setItem('redirectAfterLogin', '/add-ride');
+                window.location.href = '/login';
             }
         })
         .catch(error => {
             console.error('Error checking auth status:', error);
             // On error, redirect to login page for safety
-            window.location.href = '/login?redirect=/rides';
+            sessionStorage.setItem('redirectAfterLogin', '/add-ride');
+            window.location.href = '/login';
         });
 }
