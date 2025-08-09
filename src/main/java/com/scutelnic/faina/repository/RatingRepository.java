@@ -13,13 +13,16 @@ import java.util.Optional;
 public interface RatingRepository extends JpaRepository<Rating, Long> {
     
     // Find all ratings for a specific user
-    List<Rating> findByRatedUserIdOrderByCreatedAtDesc(Long ratedUserId);
+    @Query("SELECT r FROM Rating r WHERE r.ratedUser.id = :ratedUserId ORDER BY r.createdAt DESC")
+    List<Rating> findByRatedUserIdOrderByCreatedAtDesc(@Param("ratedUserId") Long ratedUserId);
     
     // Find rating given by a specific user to another specific user
-    Optional<Rating> findByRaterIdAndRatedUserId(Long raterId, Long ratedUserId);
+    @Query("SELECT r FROM Rating r WHERE r.rater.id = :raterId AND r.ratedUser.id = :ratedUserId")
+    Optional<Rating> findByRaterIdAndRatedUserId(@Param("raterId") Long raterId, @Param("ratedUserId") Long ratedUserId);
     
     // Check if a user has already rated another user
-    boolean existsByRaterIdAndRatedUserId(Long raterId, Long ratedUserId);
+    @Query("SELECT COUNT(r) > 0 FROM Rating r WHERE r.rater.id = :raterId AND r.ratedUser.id = :ratedUserId")
+    boolean existsByRaterIdAndRatedUserId(@Param("raterId") Long raterId, @Param("ratedUserId") Long ratedUserId);
     
     // Get average rating for a user
     @Query("SELECT AVG(r.rating) FROM Rating r WHERE r.ratedUser.id = :userId")

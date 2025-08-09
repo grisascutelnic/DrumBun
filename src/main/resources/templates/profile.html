@@ -513,6 +513,213 @@
             font-size: 0.9rem;
         }
 
+        /* Rating Section */
+        .rating-summary {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .current-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .rating-number {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        .stars-display {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .stars-display i {
+            font-size: 1.25rem;
+            color: var(--color-primary);
+        }
+
+        .rating-count {
+            font-size: 0.8rem;
+            color: var(--color-gray-500);
+        }
+
+        .login-required-message {
+            background: var(--color-gray-50);
+            border: 1px solid var(--color-gray-200);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .login-required-message h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-gray-800);
+            margin-bottom: 0.5rem;
+        }
+
+        .login-required-message p {
+            font-size: 0.9rem;
+            color: var(--color-gray-600);
+            margin-bottom: 1.5rem;
+        }
+
+        .rating-form-container {
+            background: var(--color-gray-50);
+            border: 1px solid var(--color-gray-200);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .rating-form h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-gray-700);
+            margin-bottom: 1rem;
+        }
+
+        .rating-form .star-rating {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .rating-form .star-rating input[type="radio"] {
+            display: none;
+        }
+
+        .rating-form .star-label {
+            font-size: 1.5rem;
+            color: var(--color-gray-400);
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .rating-form .star-label:hover,
+        .rating-form .star-label:hover ~ .star-label,
+        .rating-form input[type="radio"]:checked ~ .star-label {
+            color: var(--color-primary);
+        }
+
+        .rating-form .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .rating-form .form-group label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--color-gray-600);
+            margin-bottom: 0.5rem;
+        }
+
+        .rating-form .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--color-gray-300);
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            color: var(--color-gray-800);
+            line-height: 1.4;
+            resize: vertical;
+        }
+
+        .rating-update {
+            background: var(--color-gray-50);
+            border: 1px solid var(--color-gray-200);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .rating-update h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-gray-700);
+            margin-bottom: 1rem;
+        }
+
+        .user-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .user-rating-stars {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .user-rating-stars i {
+            font-size: 1.25rem;
+            color: var(--color-primary);
+        }
+
+        .user-rating-comment {
+            font-size: 0.9rem;
+            color: var(--color-gray-600);
+            line-height: 1.4;
+        }
+
+        .rating-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .rating-actions .btn {
+            flex: 1;
+        }
+
+        .user-ratings h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-gray-700);
+            margin-bottom: 1rem;
+        }
+
+        .ratings-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .rating-item {
+            background: var(--color-gray-100);
+            border-radius: var(--radius-md);
+            padding: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        .rating-item .rating-stars {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .rating-item .rating-stars i {
+            font-size: 0.9rem;
+            color: var(--color-primary);
+        }
+
+        .rating-item .rating-comment {
+            color: var(--color-gray-600);
+            font-style: italic;
+        }
+
+        .rating-item .rating-date {
+            font-size: 0.75rem;
+            color: var(--color-gray-500);
+        }
+
         /* Responsive Design */
         @media (max-width: 1024px) {
             .profile-content {
@@ -712,6 +919,71 @@
                         <h3><i class="fas fa-trophy"></i> Realizări</h3>
                         <div class="achievements-list" id="achievements-list">
                             <!-- Achievements will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Rating Section - Only for other users' profiles -->
+                    <div class="profile-card" id="rating-section" style="display: none;">
+                        <h3><i class="fas fa-star"></i> Rating & Comentarii</h3>
+                        
+                        <!-- Login Required Message -->
+                        <div class="login-required-message" id="login-required-message" style="display: none;">
+                            <div class="message-content">
+                                <i class="fas fa-lock"></i>
+                                <h4>Cont necesar pentru rating</h4>
+                                <p>Trebuie să ai un cont pentru a putea da rating și comentarii la acest profil.</p>
+                                <a href="/login" class="btn btn-primary" id="login-redirect-btn">Conectează-te</a>
+                            </div>
+                        </div>
+
+                        <!-- Rating Form - Only for logged in users -->
+                        <div class="rating-form-container" id="rating-form-container" style="display: none;">
+                            <div class="rating-form" id="rating-form" style="display: none;">
+                                <h4>Dă un rating</h4>
+                                <form id="rating-form-element">
+                                    <div class="star-rating">
+                                        <input type="radio" id="star5" name="rating" value="5">
+                                        <label for="star5" class="star-label"><i class="far fa-star"></i></label>
+                                        <input type="radio" id="star4" name="rating" value="4">
+                                        <label for="star4" class="star-label"><i class="far fa-star"></i></label>
+                                        <input type="radio" id="star3" name="rating" value="3">
+                                        <label for="star3" class="star-label"><i class="far fa-star"></i></label>
+                                        <input type="radio" id="star2" name="rating" value="2">
+                                        <label for="star2" class="star-label"><i class="far fa-star"></i></label>
+                                        <input type="radio" id="star1" name="rating" value="1">
+                                        <label for="star1" class="star-label"><i class="far fa-star"></i></label>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="rating-comment">Comentariu (opțional):</label>
+                                        <textarea id="rating-comment" name="comment" rows="3" placeholder="Spune-ne ce părere ai despre această persoană..."></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" id="submit-rating-btn">
+                                        <i class="fas fa-paper-plane"></i>
+                                        Trimite rating
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Rating Update - When user has already rated -->
+                            <div class="rating-update" id="rating-update" style="display: none;">
+                                <h4>Rating-ul tău</h4>
+                                <div class="user-rating">
+                                    <div class="user-rating-stars" id="user-rating-stars">
+                                        <!-- Stars will be displayed here -->
+                                    </div>
+                                    <p class="user-rating-comment" id="user-rating-comment">
+                                        <!-- Comment will be displayed here -->
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- User Ratings List -->
+                        <div class="user-ratings" id="user-ratings" style="display: none;">
+                            <h4>Rating-uri primite</h4>
+                            <div class="ratings-list" id="ratings-list">
+                                <!-- Ratings will be loaded here -->
+                            </div>
                         </div>
                     </div>
                 </div>

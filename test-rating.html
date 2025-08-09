@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Rating System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            border: 1px solid #ccc;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .result {
+            background: #f0f0f0;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 3px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        .star-rating {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        .star {
+            cursor: pointer;
+            font-size: 24px;
+            color: #ddd;
+        }
+        .star.selected { color: #ffd700; }
+    </style>
+</head>
+<body>
+    <h1>Test Sistem Rating</h1>
+    
+    <div class="test-section">
+        <h2>1. Verificare Autentificare</h2>
+        <button onclick="checkAuth()">Verifică Autentificarea</button>
+        <div id="auth-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Verificare Sesiune</h2>
+        <button onclick="checkSession()">Verifică Sesiunea</button>
+        <div id="session-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Test Rating API</h2>
+        <p>User ID pentru test: <input type="number" id="test-user-id" value="1" placeholder="ID utilizator pentru test"></p>
+        <button onclick="testRatingAPI()">Testează Rating API</button>
+        <div id="rating-api-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Test Trimite Rating</h2>
+        <p>Rating: 
+            <div class="star-rating">
+                <span class="star" data-value="1">★</span>
+                <span class="star" data-value="2">★</span>
+                <span class="star" data-value="3">★</span>
+                <span class="star" data-value="4">★</span>
+                <span class="star" data-value="5">★</span>
+            </div>
+            <input type="hidden" id="selected-rating" value="0">
+        </p>
+        <p>Comentariu: <textarea id="test-comment" rows="3" placeholder="Comentariu test"></textarea></p>
+        <button onclick="submitTestRating()">Trimite Rating Test</button>
+        <div id="submit-rating-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>5. Verificare Rating-uri Utilizator</h2>
+        <button onclick="checkUserRatings()">Verifică Rating-urile Utilizatorului</button>
+        <div id="user-ratings-result" class="result"></div>
+    </div>
+
+    <script>
+        // Setup star rating
+        document.querySelectorAll('.star').forEach(star => {
+            star.addEventListener('click', function() {
+                const value = this.dataset.value;
+                document.getElementById('selected-rating').value = value;
+                
+                // Update star display
+                document.querySelectorAll('.star').forEach(s => {
+                    s.classList.remove('selected');
+                    if (s.dataset.value <= value) {
+                        s.classList.add('selected');
+                    }
+                });
+            });
+        });
+
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `result ${type}`;
+        }
+
+        function checkAuth() {
+            showResult('auth-result', 'Verificare în curs...', 'info');
+            
+            fetch('/api/auth/check')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Auth check result:', data);
+                    if (data.authenticated) {
+                        showResult('auth-result', `✅ Autentificat: ${data.user.email} (ID: ${data.user.id})`, 'success');
+                    } else {
+                        showResult('auth-result', '❌ Nu este autentificat', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Auth check error:', error);
+                    showResult('auth-result', `❌ Eroare: ${error.message}`, 'error');
+                });
+        }
+
+        function checkSession() {
+            showResult('session-result', 'Verificare sesiune în curs...', 'info');
+            
+            fetch('/api/auth/user')
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                })
+                .then(user => {
+                    console.log('Session user:', user);
+                    showResult('session-result', `✅ Sesiune validă: ${user.email} (ID: ${user.id})`, 'success');
+                })
+                .catch(error => {
+                    console.error('Session check error:', error);
+                    showResult('session-result', `❌ Eroare sesiune: ${error.message}`, 'error');
+                });
+        }
+
+        function testRatingAPI() {
+            const userId = document.getElementById('test-user-id').value;
+            showResult('rating-api-result', 'Testare API rating în curs...', 'info');
+            
+            fetch(`/api/ratings/user/${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Rating API result:', data);
+                    if (data.success) {
+                        showResult('rating-api-result', 
+                            `✅ API Rating funcționează! 
+                            Rating mediu: ${data.averageRating}, 
+                            Total rating-uri: ${data.totalRatings}`, 'success');
+                    } else {
+                        showResult('rating-api-result', `❌ API Rating eroare: ${data.message}`, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Rating API error:', error);
+                    showResult('rating-api-result', `❌ Eroare API: ${error.message}`, 'error');
+                });
+        }
+
+        function submitTestRating() {
+            const userId = document.getElementById('test-user-id').value;
+            const rating = document.getElementById('selected-rating').value;
+            const comment = document.getElementById('test-comment').value;
+            
+            if (rating == 0) {
+                showResult('submit-rating-result', '❌ Selectează un rating!', 'error');
+                return;
+            }
+            
+            showResult('submit-rating-result', 'Trimitere rating în curs...', 'info');
+            
+            const formData = new FormData();
+            formData.append('ratedUserId', userId);
+            formData.append('rating', rating);
+            formData.append('comment', comment);
+            
+            fetch('/api/ratings/rate', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Submit rating result:', data);
+                if (data.success) {
+                    showResult('submit-rating-result', `✅ Rating trimis cu succes! ${data.message}`, 'success');
+                } else {
+                    showResult('submit-rating-result', `❌ Eroare: ${data.message}`, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Submit rating error:', error);
+                showResult('submit-rating-result', `❌ Eroare: ${error.message}`, 'error');
+            });
+        }
+
+        function checkUserRatings() {
+            const userId = document.getElementById('test-user-id').value;
+            showResult('user-ratings-result', 'Verificare rating-uri în curs...', 'info');
+            
+            fetch(`/api/ratings/user/${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('User ratings result:', data);
+                    if (data.success) {
+                        let ratingsHtml = `✅ Rating-uri găsite: ${data.totalRatings}<br>`;
+                        ratingsHtml += `Rating mediu: ${data.averageRating}<br>`;
+                        
+                        if (data.ratings && data.ratings.length > 0) {
+                            ratingsHtml += '<br>Rating-uri individuale:<br>';
+                            data.ratings.forEach(rating => {
+                                ratingsHtml += `- ${rating.rating}/5 stele`;
+                                if (rating.comment) {
+                                    ratingsHtml += `: "${rating.comment}"`;
+                                }
+                                ratingsHtml += '<br>';
+                            });
+                        }
+                        
+                        showResult('user-ratings-result', ratingsHtml, 'success');
+                    } else {
+                        showResult('user-ratings-result', `❌ Eroare: ${data.message}`, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('User ratings error:', error);
+                    showResult('user-ratings-result', `❌ Eroare: ${error.message}`, 'error');
+                });
+        }
+
+        // Auto-check auth on page load
+        window.addEventListener('load', function() {
+            checkAuth();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Sesiune</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            border: 1px solid #ccc;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .result {
+            background: #f0f0f0;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 3px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>Test Sesiune și Autentificare</h1>
+    
+    <div class="test-section">
+        <h2>1. Test Ping</h2>
+        <button onclick="testPing()">Testează Ping</button>
+        <div id="ping-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Test Sesiune</h2>
+        <button onclick="testSession()">Testează Sesiunea</button>
+        <div id="session-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Test Autentificare</h2>
+        <button onclick="testAuth()">Testează Autentificarea</button>
+        <div id="auth-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Test User din Sesiune</h2>
+        <button onclick="testUserSession()">Testează User din Sesiune</button>
+        <div id="user-session-result" class="result"></div>
+    </div>
+
+    <script>
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `result ${type}`;
+        }
+
+        function testPing() {
+            showResult('ping-result', 'Testare ping în curs...', 'info');
+            
+            fetch('/api/test/ping')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Ping result:', data);
+                    showResult('ping-result', JSON.stringify(data, null, 2), 'success');
+                })
+                .catch(error => {
+                    console.error('Ping error:', error);
+                    showResult('ping-result', `❌ Eroare: ${error.message}`, 'error');
+                });
+        }
+
+        function testSession() {
+            showResult('session-result', 'Testare sesiune în curs...', 'info');
+            
+            fetch('/api/test/session')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Session result:', data);
+                    showResult('session-result', JSON.stringify(data, null, 2), 'success');
+                })
+                .catch(error => {
+                    console.error('Session error:', error);
+                    showResult('session-result', `❌ Eroare: ${error.message}`, 'error');
+                });
+        }
+
+        function testAuth() {
+            showResult('auth-result', 'Testare autentificare în curs...', 'info');
+            
+            fetch('/api/auth/check')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Auth result:', data);
+                    showResult('auth-result', JSON.stringify(data, null, 2), 'success');
+                })
+                .catch(error => {
+                    console.error('Auth error:', error);
+                    showResult('auth-result', `❌ Eroare: ${error.message}`, 'error');
+                });
+        }
+
+        function testUserSession() {
+            showResult('user-session-result', 'Testare user din sesiune în curs...', 'info');
+            
+            fetch('/api/auth/user')
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                })
+                .then(user => {
+                    console.log('User session result:', user);
+                    showResult('user-session-result', JSON.stringify(user, null, 2), 'success');
+                })
+                .catch(error => {
+                    console.error('User session error:', error);
+                    showResult('user-session-result', `❌ Eroare: ${error.message}`, 'error');
+                });
+        }
+
+        // Auto-test on page load
+        window.addEventListener('load', function() {
+            testPing();
+        });
+    </script>
+</body>
+</html>

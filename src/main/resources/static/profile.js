@@ -83,7 +83,89 @@ function addSmoothScrolling() {
 }
 
 function setupEventListeners() {
-    // Tab switching
+    // Edit profile button
+    const editProfileBtn = document.getElementById('edit-profile-btn');
+    if (editProfileBtn) {
+        editProfileBtn.addEventListener('click', () => {
+            window.location.href = '/edit-profile';
+        });
+    }
+
+    // Add ride button
+    const addRideBtn = document.getElementById('add-ride-btn');
+    if (addRideBtn) {
+        addRideBtn.addEventListener('click', () => {
+            window.location.href = '/add-ride';
+        });
+    }
+
+    // Logout button
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            fetch('/api/auth/logout', { method: 'POST' })
+                .then(() => {
+                    window.location.href = '/';
+                })
+                .catch(error => {
+                    console.error('Logout error:', error);
+                    window.location.href = '/';
+                });
+        });
+    }
+
+    // Rating form submission
+    const ratingFormElement = document.getElementById('rating-form-element');
+    if (ratingFormElement) {
+        ratingFormElement.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitRating();
+        });
+    }
+
+
+
+
+
+    // Contact user button
+    const contactUserBtn = document.getElementById('contact-user-btn');
+    if (contactUserBtn) {
+        contactUserBtn.addEventListener('click', () => {
+            showNotification('Funcționalitatea de contact va fi implementată în curând!', 'info');
+        });
+    }
+
+    // View all rides button
+    const viewAllRidesBtn = document.getElementById('view-all-rides-btn');
+    if (viewAllRidesBtn) {
+        viewAllRidesBtn.addEventListener('click', () => {
+            // Scroll to rides section
+            document.getElementById('user-rides-container').scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+
+    // Report user button
+    const reportUserBtn = document.getElementById('report-user-btn');
+    if (reportUserBtn) {
+        reportUserBtn.addEventListener('click', () => {
+            showNotification('Funcționalitatea de raportare va fi implementată în curând!', 'info');
+        });
+    }
+}
+
+function setupOwnProfileMode() {
+    console.log('👤 Setting up own profile mode');
+    
+    // Show own profile sections
+    const quickActionsSection = document.getElementById('quick-actions-section');
+    const viewProfileActionsSection = document.getElementById('view-profile-actions-section');
+    const ratingSection = document.getElementById('rating-section');
+    
+    if (quickActionsSection) quickActionsSection.style.display = 'block';
+    if (viewProfileActionsSection) viewProfileActionsSection.style.display = 'none';
+    if (ratingSection) ratingSection.style.display = 'none';
+    
+    // Setup tab switching for own profile
     const tabButtons = document.querySelectorAll('.tab-btn');
     tabButtons.forEach(button => {
         button.addEventListener('click', function() {
@@ -91,75 +173,30 @@ function setupEventListeners() {
         });
     });
     
-    // Quick actions - se vor seta în funcție de tipul profilului
-    // setupOwnProfileMode() și setupViewProfileMode() se vor apela din loadUserProfile()
-}
-
-function setupOwnProfileMode() {
-    const editProfileBtn = document.getElementById('edit-profile-btn');
-    const addRideBtn = document.getElementById('add-ride-btn');
-    const logoutBtn = document.getElementById('logout-btn');
-    const addFirstRideBtn = document.getElementById('add-first-ride-btn');
-    
-    if (editProfileBtn) {
-        editProfileBtn.addEventListener('click', function() {
-            window.location.href = '/edit-profile';
-        });
-    }
-    
-    if (addRideBtn) {
-        addRideBtn.addEventListener('click', function() {
-            window.location.href = '/add-ride';
-        });
-    }
-    
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', function() {
-            if (confirm('Ești sigur că vrei să te deconectezi?')) {
-                window.location.href = '/logout';
-            }
-        });
-    }
-    
-    if (addFirstRideBtn) {
-        addFirstRideBtn.addEventListener('click', function() {
-            window.location.href = '/add-ride';
-        });
-    }
+    console.log('✅ Own profile mode configured');
 }
 
 function setupViewProfileMode() {
-    const contactUserBtn = document.getElementById('contact-user-btn');
-    const viewAllRidesBtn = document.getElementById('view-all-rides-btn');
-    const reportUserBtn = document.getElementById('report-user-btn');
+    console.log('👥 Setting up view profile mode');
     
-    if (contactUserBtn) {
-        contactUserBtn.addEventListener('click', function() {
-            // Implement contact functionality
-            showNotification('Funcționalitatea de contact va fi implementată în curând!', 'info');
-        });
-    }
-    
-    if (viewAllRidesBtn) {
-        viewAllRidesBtn.addEventListener('click', function() {
-            // Show all rides in a modal or redirect
-            showNotification('Vizualizarea tuturor călătoriilor va fi implementată în curând!', 'info');
-        });
-    }
-    
-    if (reportUserBtn) {
-        reportUserBtn.addEventListener('click', function() {
-            if (confirm('Ești sigur că vrei să raportezi acest utilizator?')) {
-                showNotification('Raportul a fost trimis cu succes!', 'success');
-            }
-        });
-    }
-    
-    // Show rating section for other users' profiles
+    // Show view profile sections
+    const quickActionsSection = document.getElementById('quick-actions-section');
+    const viewProfileActionsSection = document.getElementById('view-profile-actions-section');
     const ratingSection = document.getElementById('rating-section');
-    if (ratingSection) {
-        ratingSection.style.display = 'block';
-    }
+    
+    if (quickActionsSection) quickActionsSection.style.display = 'none';
+    if (viewProfileActionsSection) viewProfileActionsSection.style.display = 'block';
+    if (ratingSection) ratingSection.style.display = 'block';
+    
+    // Setup tab switching for view profile
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            switchTab(this.dataset.tab);
+        });
+    });
+    
+    console.log('✅ View profile mode configured');
 }
 
 function loadUserProfile() {
@@ -773,26 +810,11 @@ function deleteRide(rideId) {
 
 // Rating System Functions
 function initializeRatingSystem() {
-    // Setup rating form event listeners
-    const submitRatingBtn = document.getElementById('submit-rating-btn');
-    if (submitRatingBtn) {
-        submitRatingBtn.addEventListener('click', submitRating);
-    }
-    
-    // Setup rating update event listeners
-    const editRatingBtn = document.getElementById('edit-rating-btn');
-    const deleteRatingBtn = document.getElementById('delete-rating-btn');
-    
-    if (editRatingBtn) {
-        editRatingBtn.addEventListener('click', editRating);
-    }
-    
-    if (deleteRatingBtn) {
-        deleteRatingBtn.addEventListener('click', deleteRating);
-    }
-    
     // Setup star rating hover effects
     setupStarRatingEffects();
+    
+    // Setup login redirect functionality
+    setupLoginRedirect();
 }
 
 function setupStarRatingEffects() {
@@ -800,9 +822,11 @@ function setupStarRatingEffects() {
     
     starLabels.forEach((label, index) => {
         label.addEventListener('mouseenter', function() {
-            // Highlight stars from current to first
-            for (let i = 0; i <= index; i++) {
-                starLabels[i].style.color = '#fbbf24';
+            // Highlight stars from current to first (left to right)
+            // Since stars are ordered 5,4,3,2,1 in HTML, we need to reverse the logic
+            const starIndex = 4 - index; // Convert 0,1,2,3,4 to 4,3,2,1,0
+            for (let i = 0; i <= starIndex; i++) {
+                starLabels[4 - i].style.color = '#fbbf24';
             }
         });
         
@@ -812,7 +836,9 @@ function setupStarRatingEffects() {
             if (selectedRating) {
                 const ratingValue = parseInt(selectedRating.value);
                 starLabels.forEach((star, i) => {
-                    if (i < ratingValue) {
+                    // Since stars are ordered 5,4,3,2,1, we need to reverse the logic
+                    const starIndex = 4 - i; // Convert 0,1,2,3,4 to 4,3,2,1,0
+                    if (starIndex < ratingValue) {
                         star.style.color = '#fbbf24';
                     } else {
                         star.style.color = '#d1d5db';
@@ -838,9 +864,11 @@ function setupStarRatingEffects() {
             // Check the selected rating
             radioInput.checked = true;
             
-            // Update star colors to show selected rating
+            // Update star colors to show selected rating (left to right)
             starLabels.forEach((star, i) => {
-                if (i < ratingValue) {
+                // Since stars are ordered 5,4,3,2,1, we need to reverse the logic
+                const starIndex = 4 - i; // Convert 0,1,2,3,4 to 4,3,2,1,0
+                if (starIndex < ratingValue) {
                     star.style.color = '#fbbf24';
                 } else {
                     star.style.color = '#d1d5db';
@@ -850,124 +878,235 @@ function setupStarRatingEffects() {
     });
 }
 
+function setupLoginRedirect() {
+    const loginBtn = document.getElementById('login-redirect-btn');
+    if (loginBtn) {
+        loginBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Save current profile URL for redirect after login
+            const currentProfileUrl = window.location.pathname;
+            sessionStorage.setItem('redirectAfterLogin', currentProfileUrl);
+            
+            console.log('🔗 Saving redirect URL:', currentProfileUrl);
+            
+            // Redirect to login page
+            window.location.href = '/login';
+        });
+    }
+}
+
 function loadUserRatingData(userId) {
-    // Load rating summary
-    fetch(`/api/ratings/user/${userId}`)
-        .then(response => {
-            if (response.ok) {
-                return response.json();
+    console.log('🔍 loadUserRatingData called for userId:', userId);
+    
+    // First check if user is authenticated
+    fetch('/api/auth/check')
+        .then(response => response.json())
+        .then(authData => {
+            console.log('🔍 Auth check result:', authData);
+            
+            if (authData.authenticated) {
+                const currentUser = authData.user;
+                console.log('✅ User authenticated:', currentUser);
+                
+                // Check if user is trying to rate themselves
+                if (currentUser.id == userId) {
+                    console.log('❌ User cannot rate themselves');
+                    document.getElementById('rating-section').style.display = 'none';
+                    return;
+                }
+                
+                // Show rating section and form container for authenticated users
+                const ratingSection = document.getElementById('rating-section');
+                const ratingFormContainer = document.getElementById('rating-form-container');
+                const loginRequiredMessage = document.getElementById('login-required-message');
+                
+                if (ratingSection) ratingSection.style.display = 'block';
+                if (ratingFormContainer) ratingFormContainer.style.display = 'block';
+                if (loginRequiredMessage) loginRequiredMessage.style.display = 'none';
+                
+                console.log('✅ Rating section shown for authenticated user');
+                
+                // Load rating summary
+                return fetch(`/api/ratings/user/${userId}`);
             } else {
+                console.log('❌ User not authenticated');
+                throw new Error('User not authenticated');
+            }
+        })
+        .then(response => {
+            if (response && response.ok) {
+                return response.json();
+            } else if (response) {
                 throw new Error('Failed to load rating data');
             }
         })
         .then(data => {
-            if (data.success) {
+            if (data && data.success) {
                 const averageRating = data.averageRating || 0;
                 const totalRatings = data.totalRatings || 0;
-                updateRatingDisplay(averageRating, totalRatings);
+                // updateRatingDisplay(averageRating, totalRatings); // Removed as per edit hint
                 displayUserRatings(data.ratings);
             } else {
                 // Set default values if no rating data
-                updateRatingDisplay(0, 0);
+                // updateRatingDisplay(0, 0); // Removed as per edit hint
+            }
+            
+            // Check if current user has already rated this user
+            return checkCurrentUserRating(userId);
+        })
+        .catch(error => {
+            console.log('❌ User not authenticated or error occurred:', error);
+            
+            // Show login required message for non-authenticated users
+            const ratingSection = document.getElementById('rating-section');
+            const ratingFormContainer = document.getElementById('rating-form-container');
+            const loginRequiredMessage = document.getElementById('login-required-message');
+            
+            if (ratingSection) ratingSection.style.display = 'block';
+            if (ratingFormContainer) ratingFormContainer.style.display = 'none';
+            if (loginRequiredMessage) loginRequiredMessage.style.display = 'block';
+            
+            console.log('✅ Login required message shown for non-authenticated user');
+            
+            // Still try to load rating summary for display
+            return fetch(`/api/ratings/user/${userId}`);
+        })
+        .then(response => {
+            if (response && response.ok) {
+                return response.json();
+            }
+        })
+        .then(data => {
+            if (data && data.success) {
+                const averageRating = data.averageRating || 0;
+                const totalRatings = data.totalRatings || 0;
+                // updateRatingDisplay(averageRating, totalRatings); // Removed as per edit hint
+                displayUserRatings(data.ratings);
+            } else {
+                // Set default values if no rating data
+                // updateRatingDisplay(0, 0); // Removed as per edit hint
             }
         })
         .catch(error => {
             console.error('Error loading rating data:', error);
-            // Set default values on error
-            updateRatingDisplay(0, 0);
+            // No need to update rating display since we removed that section
         });
-    
-    // Check if current user has already rated this user
-    checkCurrentUserRating(userId);
-}
-
-function updateRatingDisplay(averageRating, totalRatings) {
-    const currentRating = document.getElementById('current-rating');
-    const ratingCount = document.getElementById('rating-count');
-    const starsDisplay = document.getElementById('stars-display');
-    
-    if (currentRating) {
-        currentRating.textContent = averageRating.toFixed(1);
-    }
-    
-    if (ratingCount) {
-        if (totalRatings === 0) {
-            ratingCount.textContent = '0 rating-uri';
-        } else {
-            ratingCount.textContent = `${totalRatings} rating${totalRatings !== 1 ? '-uri' : ''}`;
-        }
-    }
-    
-    if (starsDisplay) {
-        updateStarsDisplay(starsDisplay, averageRating);
-    }
-}
-
-function updateStarsDisplay(starsContainer, rating) {
-    const stars = starsContainer.querySelectorAll('i');
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-    
-    stars.forEach((star, index) => {
-        if (rating === 0) {
-            // No rating - show empty stars
-            star.className = 'far fa-star';
-            star.style.color = '#d1d5db';
-        } else if (index < fullStars) {
-            // Full star
-            star.className = 'fas fa-star';
-            star.style.color = '#fbbf24';
-        } else if (index === fullStars && hasHalfStar) {
-            // Half star
-            star.className = 'fas fa-star-half-alt';
-            star.style.color = '#fbbf24';
-        } else {
-            // Empty star
-            star.className = 'far fa-star';
-            star.style.color = '#d1d5db';
-        }
-    });
 }
 
 function displayUserRatings(ratings) {
-    // This function can be expanded to show individual ratings
-    // For now, we just use the summary data
-    console.log('User ratings loaded:', ratings);
+    console.log('🔍 displayUserRatings called with ratings:', ratings);
+    
+    const ratingsList = document.getElementById('ratings-list');
+    const userRatings = document.getElementById('user-ratings');
+    
+    if (!ratingsList || !userRatings) {
+        console.error('❌ Ratings elements not found');
+        return;
+    }
+    
+    if (!ratings || ratings.length === 0) {
+        userRatings.style.display = 'none';
+        console.log('✅ No ratings to display, hiding ratings section');
+        return;
+    }
+    
+    // Show ratings section
+    userRatings.style.display = 'block';
+    
+    // Clear existing ratings
+    ratingsList.innerHTML = '';
+    
+    // Add each rating
+    ratings.forEach(rating => {
+        const ratingItem = document.createElement('div');
+        ratingItem.className = 'rating-item';
+        
+        const stars = [];
+        for (let i = 1; i <= 5; i++) {
+            if (i <= rating.rating) {
+                stars.push('<i class="fas fa-star"></i>');
+            } else {
+                stars.push('<i class="far fa-star"></i>');
+            }
+        }
+        
+        ratingItem.innerHTML = `
+            <div class="rating-info">
+                <div class="rating-stars">${stars.join('')}</div>
+                ${rating.comment ? `<div class="rating-comment">"${rating.comment}"</div>` : ''}
+            </div>
+            <div class="rating-date">${formatDate(rating.createdAt)}</div>
+        `;
+        
+        ratingsList.appendChild(ratingItem);
+    });
+    
+    console.log(`✅ Displayed ${ratings.length} ratings`);
 }
 
 function checkCurrentUserRating(ratedUserId) {
-    fetch(`/api/ratings/check/${ratedUserId}`)
+    console.log('🔍 checkCurrentUserRating called for ratedUserId:', ratedUserId);
+    
+    // First check if user is authenticated
+    fetch('/api/auth/check')
+        .then(response => response.json())
+        .then(authData => {
+            if (!authData.authenticated) {
+                console.log('❌ User not authenticated, cannot check rating');
+                return;
+            }
+            
+            console.log('✅ User authenticated, checking rating...');
+            
+            return fetch(`/api/ratings/check/${ratedUserId}`);
+        })
         .then(response => {
-            if (response.ok) {
+            if (response && response.ok) {
                 return response.json();
-            } else {
+            } else if (response) {
                 throw new Error('Failed to check rating');
             }
         })
         .then(data => {
-            if (data.success) {
+            if (data && data.success) {
                 if (data.hasRated) {
+                    console.log('✅ User has already rated, showing update form');
                     showRatingUpdate(data.existingRating);
                 } else {
+                    console.log('✅ User has not rated, showing rating form');
                     showRatingForm();
                 }
+            } else {
+                console.log('❌ Rating check failed, showing rating form');
+                showRatingForm();
             }
         })
         .catch(error => {
-            console.error('Error checking rating:', error);
+            console.error('❌ Error checking rating:', error);
             showRatingForm();
         });
 }
 
 function showRatingForm() {
+    console.log('🔍 showRatingForm called');
+    
     const ratingForm = document.getElementById('rating-form');
     const ratingUpdate = document.getElementById('rating-update');
     
-    if (ratingForm) ratingForm.style.display = 'block';
-    if (ratingUpdate) ratingUpdate.style.display = 'none';
+    if (ratingForm) {
+        ratingForm.style.display = 'block';
+        console.log('✅ Rating form shown');
+    }
+    if (ratingUpdate) {
+        ratingUpdate.style.display = 'none';
+        console.log('✅ Rating update hidden');
+    }
     
     // Reset rating form
-    document.getElementById('rating-comment').value = '';
+    const commentField = document.getElementById('rating-comment');
+    if (commentField) commentField.value = '';
+    
     document.querySelectorAll('input[name="rating"]').forEach(input => {
         input.checked = false;
     });
@@ -977,43 +1116,63 @@ function showRatingForm() {
     starLabels.forEach(star => {
         star.style.color = '#d1d5db';
     });
+    
+    // Change button text and action to submit new rating
+    const submitBtn = document.getElementById('submit-rating-btn');
+    if (submitBtn) {
+        submitBtn.textContent = 'Trimite rating';
+        submitBtn.onclick = submitRating;
+    }
+    
+    console.log('✅ Rating form reset and ready');
 }
 
 function showRatingUpdate(existingRating) {
-    const ratingForm = document.getElementById('rating-form');
-    const ratingUpdate = document.getElementById('rating-update');
-    const userRatingStars = document.getElementById('user-rating-stars');
-    const userRatingComment = document.getElementById('user-rating-comment');
+    console.log('🔍 showRatingUpdate called with existingRating:', existingRating);
     
-    if (ratingForm) ratingForm.style.display = 'none';
-    if (ratingUpdate) ratingUpdate.style.display = 'block';
+    // Instead of showing the update section, directly show the rating form
+    // This allows users to change their rating by simply selecting new stars and submitting
+    showRatingForm();
     
-    // Display user's existing rating
-    if (userRatingStars && existingRating) {
-        userRatingStars.innerHTML = '';
-        for (let i = 1; i <= 5; i++) {
-            const star = document.createElement('i');
-            if (i <= existingRating.rating) {
-                star.className = 'fas fa-star';
+    // Pre-fill the form with existing rating data
+    if (existingRating) {
+        // Set the rating
+        const ratingInput = document.getElementById(`star${existingRating.rating}`);
+        if (ratingInput) {
+            ratingInput.checked = true;
+        }
+        
+        // Set the comment
+        const commentField = document.getElementById('rating-comment');
+        if (commentField && existingRating.comment) {
+            commentField.value = existingRating.comment;
+        }
+        
+        // Update star colors to show the current rating
+        const starLabels = document.querySelectorAll('.star-label');
+        starLabels.forEach((star, i) => {
+            // Since stars are ordered 5,4,3,2,1 in HTML, we need to reverse the logic
+            const starIndex = 4 - i; // Convert 0,1,2,3,4 to 4,3,2,1,0
+            if (starIndex < existingRating.rating) {
                 star.style.color = '#fbbf24';
             } else {
-                star.className = 'far fa-star';
                 star.style.color = '#d1d5db';
             }
-            userRatingStars.appendChild(star);
+        });
+        
+        // Change submit button text to indicate this is an update
+        const submitBtn = document.getElementById('submit-rating-btn');
+        if (submitBtn) {
+            submitBtn.textContent = 'Actualizează rating-ul';
         }
-    }
-    
-    if (userRatingComment) {
-        if (existingRating && existingRating.comment && existingRating.comment.trim()) {
-            userRatingComment.textContent = existingRating.comment;
-        } else {
-            userRatingComment.textContent = 'Nu a fost adăugat niciun comentariu.';
-        }
+        
+        console.log('✅ Rating form pre-filled with existing rating data');
     }
 }
 
 function submitRating() {
+    console.log('🔍 submitRating called');
+    
     // Get rating value
     const ratingInput = document.querySelector('input[name="rating"]:checked');
     if (!ratingInput) {
@@ -1024,81 +1183,7 @@ function submitRating() {
     const rating = parseInt(ratingInput.value);
     const comment = document.getElementById('rating-comment').value;
     
-    // Get the user ID from the URL
-    const pathSegments = window.location.pathname.split('/');
-    const ratedUserId = pathSegments.length > 2 && pathSegments[1] === 'profile' ? pathSegments[2] : null;
-    
-    if (!ratedUserId) {
-        showNotification('Eroare: ID utilizator invalid!', 'error');
-        return;
-    }
-    
-    // Submit rating
-    const formData = new FormData();
-    formData.append('ratedUserId', ratedUserId);
-    formData.append('rating', rating);
-    if (comment.trim()) {
-        formData.append('comment', comment.trim());
-    }
-    
-    fetch('/api/ratings/rate', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
-        if (response.ok) {
-            return response.json();
-        } else {
-            throw new Error('Failed to submit rating');
-        }
-    })
-    .then(data => {
-        if (data.success) {
-            showNotification('Rating-ul a fost salvat cu succes!', 'success');
-            // Reload rating data
-            loadUserRatingData(ratedUserId);
-            // Reset form
-            document.getElementById('rating-comment').value = '';
-            document.querySelectorAll('input[name="rating"]').forEach(input => input.checked = false);
-            
-            // Reset star colors
-            const starLabels = document.querySelectorAll('.star-label');
-            starLabels.forEach(star => {
-                star.style.color = '#d1d5db';
-            });
-        } else {
-            showNotification(data.message || 'Eroare la salvarea rating-ului!', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error submitting rating:', error);
-        showNotification('Eroare la salvarea rating-ului!', 'error');
-    });
-}
-
-function editRating() {
-    // Show rating form for editing
-    showRatingForm();
-    
-    // Get existing rating data
-    const pathSegments = window.location.pathname.split('/');
-    const ratedUserId = pathSegments.length > 2 && pathSegments[1] === 'profile' ? pathSegments[2] : null;
-    
-    if (ratedUserId) {
-        checkCurrentUserRating(ratedUserId);
-    }
-    
-    // Reset star colors
-    const starLabels = document.querySelectorAll('.star-label');
-    starLabels.forEach(star => {
-        star.style.color = '#d1d5db';
-    });
-}
-
-function deleteRating() {
-    if (!confirm('Ești sigur că vrei să ștergi rating-ul tău?')) {
-        return;
-    }
+    console.log('📝 Rating data:', { rating, comment });
     
     // Get the user ID from the URL
     const pathSegments = window.location.pathname.split('/');
@@ -1109,44 +1194,60 @@ function deleteRating() {
         return;
     }
     
-    // Get existing rating to delete
-    fetch(`/api/ratings/check/${ratedUserId}`)
-        .then(data => {
-            if (data.success && data.hasRated && data.existingRating) {
-                return fetch(`/api/ratings/${data.existingRating.id}`, {
-                    method: 'DELETE'
-                });
-            } else {
-                throw new Error('Rating not found');
+    console.log('👤 Submitting rating for user:', ratedUserId);
+    
+    // First check if user is authenticated
+    fetch('/api/auth/check')
+        .then(response => response.json())
+        .then(authData => {
+            if (!authData.authenticated) {
+                throw new Error('User not authenticated');
             }
+            
+            console.log('✅ User authenticated, proceeding with rating submission');
+            
+            // Use the simple endpoint that handles both create and update
+            console.log('🔄 Submitting rating (will create new or update existing)');
+            const formData = new FormData();
+            formData.append('ratedUserId', ratedUserId);
+            formData.append('rating', rating);
+            formData.append('comment', comment);
+            
+            return fetch('/api/ratings/rate', {
+                method: 'POST',
+                body: formData
+            });
         })
         .then(response => {
+            console.log('📡 Rating response status:', response.status);
             if (response.ok) {
                 return response.json();
             } else {
-                throw new Error('Failed to delete rating');
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
         })
         .then(data => {
-            if (data.success) {
-                showNotification('Rating-ul a fost șters cu succes!', 'success');
-                // Reload rating data
-                loadUserRatingData(ratedUserId);
-                // Reset form
-                document.getElementById('rating-comment').value = '';
-                document.querySelectorAll('input[name="rating"]').forEach(input => input.checked = false);
-                
-                // Reset star colors
-                const starLabels = document.querySelectorAll('.star-label');
-                starLabels.forEach(star => {
-                    star.style.color = '#d1d5db';
-                });
-            } else {
-                showNotification(data.message || 'Eroare la ștergerea rating-ului!', 'error');
-            }
+            console.log('✅ Rating processed successfully:', data);
+            const message = data.message || 'Rating-ul a fost procesat cu succes!';
+            showNotification(message, 'success');
+            
+            // Reload the entire page after successful rating submission
+            console.log('🔄 Reloading page after successful rating submission');
+            window.location.reload();
         })
         .catch(error => {
-            console.error('Error deleting rating:', error);
-            showNotification('Eroare la ștergerea rating-ului!', 'error');
+            console.error('❌ Error processing rating:', error);
+            if (error.message.includes('not authenticated')) {
+                showNotification('Trebuie să fiți logat pentru a pune un rating!', 'error');
+            } else {
+                showNotification('Eroare la procesarea rating-ului: ' + error.message, 'error');
+            }
         });
 }
+
+
+
+
+
+
+
