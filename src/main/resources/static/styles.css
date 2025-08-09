@@ -4171,6 +4171,8 @@ html {
     display: flex;
     flex-direction: row-reverse;
     gap: 0.25rem;
+    justify-content: center;
+    align-items: center;
 }
 
 .star-rating input[type="radio"] {
