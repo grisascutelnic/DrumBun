@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeAddRideButton();
     initializeRidesPageAutocomplete();
     initializeModernCalendar();
+    initializeUserProfileLinks();
 });
 
 // Inițializarea contoarelor pentru pasageri și colete
@@ -219,5 +220,51 @@ function initializeModernCalendar() {
         });
         
         console.log('Modern calendar initialized for main page travel date');
+    }
+}
+
+// Inițializarea linkurilor pentru profilul utilizatorului
+function initializeUserProfileLinks() {
+    console.log('🔍 Initializing user profile links...');
+    
+    // Event delegation pentru linkurile de profil utilizator
+    document.addEventListener('click', function(e) {
+        console.log('🖱️ Click detected on:', e.target);
+        
+        if (e.target.closest('.user-profile-link')) {
+            console.log('✅ Click on user profile link detected!');
+            const link = e.target.closest('.user-profile-link');
+            const userId = link.getAttribute('data-user-id');
+            console.log('👤 User ID extracted:', userId);
+            
+            if (userId) {
+                console.log('🚀 Navigating to user profile:', userId);
+                navigateToUserProfile(userId);
+            } else {
+                console.error('❌ No user ID found in data-user-id attribute');
+            }
+        }
+    });
+    
+    // Verificăm dacă există elemente cu clasa user-profile-link
+    const profileLinks = document.querySelectorAll('.user-profile-link');
+    console.log('🔗 Found profile links:', profileLinks.length);
+    profileLinks.forEach((link, index) => {
+        const userId = link.getAttribute('data-user-id');
+        console.log(`🔗 Link ${index}: data-user-id="${userId}"`);
+    });
+}
+
+// Navigarea la profilul utilizatorului
+function navigateToUserProfile(userId) {
+    console.log('🧭 navigateToUserProfile called with userId:', userId);
+    
+    if (userId) {
+        const profileUrl = `/profile/${userId}`;
+        console.log('🌐 Redirecting to:', profileUrl);
+        window.location.href = profileUrl;
+    } else {
+        console.error('❌ User ID is missing for profile navigation.');
+        showNotification('Eroare: ID-ul utilizatorului nu a fost găsit.', 'error');
     }
 }

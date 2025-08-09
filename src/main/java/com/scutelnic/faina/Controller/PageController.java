@@ -128,9 +128,23 @@ public class PageController {
     
     @GetMapping("/profile/{userId}")
     public String userProfile(@PathVariable Long userId, Model model) {
-        // Adăugăm userId-ul în model pentru a fi folosit în template
-        model.addAttribute("targetUserId", userId);
-        return "profile";
+        try {
+            // Verificăm dacă userId-ul este valid
+            if (userId == null || userId <= 0) {
+                throw new IllegalArgumentException("Invalid user ID: " + userId);
+            }
+            
+            // Adăugăm userId-ul în model pentru a fi folosit în template
+            model.addAttribute("targetUserId", userId);
+            return "profile";
+        } catch (Exception e) {
+            // Logăm eroarea
+            System.err.println("Error in userProfile: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Redirecționăm la pagina principală în caz de eroare
+            return "redirect:/";
+        }
     }
     
     @GetMapping("/edit-profile")

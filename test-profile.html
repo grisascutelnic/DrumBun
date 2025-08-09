@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Profile - DrumBun</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .result {
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Profile Functionality - DrumBun</h1>
+    
+    <div class="test-section">
+        <h2>1. Test Authentication Status</h2>
+        <button class="test-button" onclick="testAuthStatus()">Check Auth Status</button>
+        <div id="auth-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Test Current User API</h2>
+        <button class="test-button" onclick="testCurrentUser()">Get Current User</button>
+        <div id="current-user-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Test User Profile API</h2>
+        <input type="number" id="test-user-id" placeholder="Enter User ID" value="1">
+        <button class="test-button" onclick="testUserProfile()">Get User Profile</button>
+        <div id="user-profile-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Test My Rides API</h2>
+        <button class="test-button" onclick="testMyRides()">Get My Rides</button>
+        <div id="my-rides-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>5. Test User Rides API</h2>
+        <input type="number" id="test-rides-user-id" placeholder="Enter User ID" value="1">
+        <button class="test-button" onclick="testUserRides()">Get User Rides</button>
+        <div id="user-rides-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>6. Test Profile Page Navigation</h2>
+        <button class="test-button" onclick="goToProfile()">Go to /profile</button>
+        <button class="test-button" onclick="goToUserProfile()">Go to /profile/1</button>
+    </div>
+
+    <script>
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `result ${type}`;
+        }
+
+        async function testAuthStatus() {
+            try {
+                const response = await fetch('/api/auth/check');
+                const data = await response.json();
+                showResult('auth-result', JSON.stringify(data, null, 2), 'success');
+            } catch (error) {
+                showResult('auth-result', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCurrentUser() {
+            try {
+                const response = await fetch('/api/auth/user');
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult('current-user-result', JSON.stringify(data, null, 2), 'success');
+                } else {
+                    showResult('current-user-result', `HTTP ${response.status}: ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                showResult('current-user-result', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testUserProfile() {
+            const userId = document.getElementById('test-user-id').value;
+            try {
+                const response = await fetch(`/api/users/${userId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult('user-profile-result', JSON.stringify(data, null, 2), 'success');
+                } else {
+                    showResult('user-profile-result', `HTTP ${response.status}: ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                showResult('user-profile-result', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testMyRides() {
+            try {
+                const response = await fetch('/api/rides/my-rides');
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult('my-rides-result', JSON.stringify(data, null, 2), 'success');
+                } else {
+                    showResult('my-rides-result', `HTTP ${response.status}: ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                showResult('my-rides-result', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testUserRides() {
+            const userId = document.getElementById('test-rides-user-id').value;
+            try {
+                const response = await fetch(`/api/rides/user/${userId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult('user-rides-result', JSON.stringify(data, null, 2), 'success');
+                } else {
+                    showResult('user-rides-result', `HTTP ${response.status}: ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                showResult('user-rides-result', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        function goToProfile() {
+            window.location.href = '/profile';
+        }
+
+        function goToUserProfile() {
+            const userId = document.getElementById('test-user-id').value;
+            window.location.href = `/profile/${userId}`;
+        }
+
+        // Auto-run auth check on page load
+        window.addEventListener('load', () => {
+            testAuthStatus();
+        });
+    </script>
+</body>
+</html>

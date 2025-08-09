@@ -41,6 +41,12 @@ public class User {
     @Column(nullable = false)
     private Boolean isActive;
     
+    @Column
+    private Double averageRating;
+    
+    @Column
+    private Long totalRatings;
+    
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

@@ -9,37 +9,44 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load user data
     loadUserProfile();
     
-    // Load user rides
-    loadUserRides();
-    
     // Setup event listeners
     setupEventListeners();
+    
+    // Initialize rating system
+    initializeRatingSystem();
 });
 
 // Funcție pentru verificarea autentificării
 function checkAuthentication() {
-    fetch('/api/auth/user')
-        .then(response => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                return null;
-            }
-        })
-        .then(user => {
-            if (!user) {
-                // Utilizatorul nu este autentificat, redirecționăm la logare
-                // Salvăm URL-ul curent pentru a reveni după logare
-                sessionStorage.setItem('redirectAfterLogin', '/profile');
+    // Verificăm dacă suntem pe o rută de profil specific
+    const pathSegments = window.location.pathname.split('/');
+    const targetUserId = pathSegments.length > 2 && pathSegments[1] === 'profile' ? pathSegments[2] : null;
+    
+    // Dacă suntem pe profilul propriu, verificăm autentificarea
+    if (!targetUserId || targetUserId === 'edit-profile') {
+        fetch('/api/auth/user')
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    return null;
+                }
+            })
+            .then(user => {
+                if (!user) {
+                    // Utilizatorul nu este autentificat, redirecționăm la logare
+                    // Salvăm URL-ul curent pentru a reveni după logare
+                    sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
+                    window.location.href = '/login';
+                }
+            })
+            .catch(error => {
+                console.error('Error checking auth status:', error);
+                // În caz de eroare, redirecționăm la logare
+                sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
                 window.location.href = '/login';
-            }
-        })
-        .catch(error => {
-            console.error('Error checking auth status:', error);
-            // În caz de eroare, redirecționăm la logare
-            sessionStorage.setItem('redirectAfterLogin', '/profile');
-            window.location.href = '/login';
-        });
+            });
+    }
 }
 
 function initializeProfile() {
@@ -84,9 +91,8 @@ function setupEventListeners() {
         });
     });
     
-    // Quick actions
-    setupOwnProfileMode();
-    setupViewProfileMode();
+    // Quick actions - se vor seta în funcție de tipul profilului
+    // setupOwnProfileMode() și setupViewProfileMode() se vor apela din loadUserProfile()
 }
 
 function setupOwnProfileMode() {
@@ -148,12 +154,68 @@ function setupViewProfileMode() {
             }
         });
     }
+    
+    // Show rating section for other users' profiles
+    const ratingSection = document.getElementById('rating-section');
+    if (ratingSection) {
+        ratingSection.style.display = 'block';
+    }
 }
 
 function loadUserProfile() {
+    console.log('🔍 loadUserProfile called');
     // Show loading state
     showLoadingState();
     
+    // Verificăm dacă suntem pe o rută de profil specific
+    const pathSegments = window.location.pathname.split('/');
+    const targetUserId = pathSegments.length > 2 && pathSegments[1] === 'profile' ? pathSegments[2] : null;
+    
+    console.log('📍 Current path:', window.location.pathname);
+    console.log('🔢 Path segments:', pathSegments);
+    console.log('👤 Target User ID:', targetUserId);
+    
+    if (targetUserId && targetUserId !== 'edit-profile') {
+        console.log('✅ Loading specific user profile for ID:', targetUserId);
+        // Încărcăm profilul unui utilizator specific
+        loadSpecificUserProfile(targetUserId);
+    } else {
+        console.log('👤 Loading current user profile');
+        // Încărcăm profilul utilizatorului logat
+        loadCurrentUserProfile();
+    }
+}
+
+function loadSpecificUserProfile(userId) {
+    console.log('🔍 loadSpecificUserProfile called with userId:', userId);
+    
+    fetch(`/api/users/${userId}`)
+        .then(response => {
+            console.log('📡 API response status:', response.status);
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('User not found');
+            }
+        })
+        .then(user => {
+            console.log('👤 User data received:', user);
+            hideLoadingState();
+            displayUserInfo(user, false); // false = nu este profilul propriu
+            loadSpecificUserRides(userId);
+            setupViewProfileMode(); // Activăm modul de vizualizare
+            loadUserRatingData(userId); // Load rating data
+        })
+        .catch(error => {
+            console.error('❌ Error loading specific user profile:', error);
+            hideLoadingState();
+            showNotification('Utilizatorul nu a fost găsit!', 'error');
+            // Redirecționăm la profilul propriu
+            window.location.href = '/profile';
+        });
+}
+
+function loadCurrentUserProfile() {
     fetch('/api/auth/user')
         .then(response => {
             if (response.ok) {
@@ -162,14 +224,41 @@ function loadUserProfile() {
                 throw new Error('User not authenticated');
             }
         })
-        .then(data => {
+        .then(user => {
             hideLoadingState();
-            displayUserInfo(data);
+            displayUserInfo(user, true); // true = este profilul propriu
+            loadUserRides();
+            setupOwnProfileMode(); // Activăm modul propriu
         })
         .catch(error => {
             console.error('Error loading user profile:', error);
             hideLoadingState();
             showNotification('Eroare la încărcarea profilului!', 'error');
+        });
+}
+
+function loadSpecificUserRides(userId) {
+    showRidesLoading();
+    
+    // Încărcăm cursele utilizatorului specific
+    fetch(`/api/rides/user/${userId}`)
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Failed to load user rides');
+            }
+        })
+        .then(data => {
+            hideRidesLoading();
+            displayUserRides(data, false); // false = nu sunt cursele proprii
+            updateRideStats(data);
+            updateAchievements(data);
+        })
+        .catch(error => {
+            console.error('Error loading specific user rides:', error);
+            hideRidesLoading();
+            showNotification('Eroare la încărcarea călătoriilor utilizatorului!', 'error');
         });
 }
 
@@ -186,7 +275,7 @@ function loadUserRides() {
         })
         .then(data => {
             hideRidesLoading();
-            displayUserRides(data);
+            displayUserRides(data, true); // true = sunt cursele proprii
             updateRideStats(data);
             updateAchievements(data);
         })
@@ -234,59 +323,114 @@ function showNoRides() {
     if (noRides) noRides.style.display = 'block';
 }
 
-function displayUserInfo(user) {
-    // Update profile image
-    const profileImage = document.getElementById('profile-image');
-    const defaultAvatar = document.getElementById('default-avatar');
+function displayUserInfo(user, isOwnProfile) {
+    console.log('🔍 displayUserInfo called with user:', user, 'isOwnProfile:', isOwnProfile);
     
-    if (user.profileImage) {
-        profileImage.src = `/uploads/profile-images/${user.profileImage}`;
-        profileImage.style.display = 'block';
-        defaultAvatar.style.display = 'none';
-    } else {
-        profileImage.style.display = 'none';
-        defaultAvatar.style.display = 'block';
+    try {
+        // Update profile image
+        const profileImage = document.getElementById('profile-image');
+        const defaultAvatar = document.getElementById('default-avatar');
+        
+        console.log('🖼️ Profile image elements:', { profileImage, defaultAvatar });
+        
+        if (user.profileImage) {
+            profileImage.src = `/uploads/profile-images/${user.profileImage}`;
+            profileImage.style.display = 'block';
+            defaultAvatar.style.display = 'none';
+        } else {
+            profileImage.style.display = 'none';
+            defaultAvatar.style.display = 'block';
+        }
+        
+        console.log('✅ Profile image updated');
+        
+        // Update user information with smooth transitions
+        animateTextChange('user-name', `${user.firstName} ${user.lastName}`);
+        animateTextChange('user-email', user.email);
+        animateTextChange('full-name', `${user.firstName} ${user.lastName}`);
+        animateTextChange('email', user.email);
+        animateTextChange('phone', user.phone || 'Nu specificat');
+        animateTextChange('created-at', formatDate(user.createdAt));
+        
+        console.log('✅ User info updated');
+        
+        // Update user status
+        const userStatus = document.getElementById('user-status');
+        if (userStatus) {
+            userStatus.textContent = 'Activ';
+            userStatus.style.color = '#10b981';
+        }
+        
+        // Update member since
+        animateTextChange('member-since-header', formatDate(user.createdAt));
+        
+        // Update rating from user data - only for display purposes
+        // The actual rating data will be loaded separately by loadUserRatingData
+        if (user.averageRating !== null && user.averageRating !== undefined && user.averageRating > 0) {
+            animateTextChange('rating-header', user.averageRating.toFixed(1));
+        } else {
+            animateTextChange('rating-header', '0.0');
+        }
+        
+        console.log('✅ Rating updated');
+        
+        // Show appropriate sections based on profile type
+        if (isOwnProfile) {
+            console.log('👤 Setting up own profile mode');
+            const quickActionsSection = document.getElementById('quick-actions-section');
+            const viewProfileActionsSection = document.getElementById('view-profile-actions-section');
+            const ratingSection = document.getElementById('rating-section');
+            const ridesSectionTitle = document.getElementById('rides-section-title');
+            
+            console.log('🔍 Found elements:', { quickActionsSection, viewProfileActionsSection, ratingSection, ridesSectionTitle });
+            
+            if (quickActionsSection) quickActionsSection.style.display = 'block';
+            if (viewProfileActionsSection) viewProfileActionsSection.style.display = 'none';
+            if (ratingSection) ratingSection.style.display = 'none';
+            if (ridesSectionTitle) ridesSectionTitle.textContent = 'Călătoriile mele';
+        } else {
+            console.log('👥 Setting up view profile mode');
+            const quickActionsSection = document.getElementById('quick-actions-section');
+            const viewProfileActionsSection = document.getElementById('view-profile-actions-section');
+            const ratingSection = document.getElementById('rating-section');
+            const ridesSectionTitle = document.getElementById('rides-section-title');
+            
+            console.log('🔍 Found elements:', { quickActionsSection, viewProfileActionsSection, ratingSection, ridesSectionTitle });
+            
+            if (quickActionsSection) quickActionsSection.style.display = 'none';
+            if (viewProfileActionsSection) viewProfileActionsSection.style.display = 'block';
+            if (ratingSection) ratingSection.style.display = 'block';
+            if (ridesSectionTitle) ridesSectionTitle.textContent = 'Călătoriile acestui utilizator';
+        }
+        
+        console.log('✅ Profile sections configured');
+        
+    } catch (error) {
+        console.error('❌ Error in displayUserInfo:', error);
+        showNotification('Eroare la afișarea informațiilor utilizatorului!', 'error');
     }
-    
-    // Update user information with smooth transitions
-    animateTextChange('user-name', `${user.firstName} ${user.lastName}`);
-    animateTextChange('user-email', user.email);
-    animateTextChange('full-name', `${user.firstName} ${user.lastName}`);
-    animateTextChange('email', user.email);
-    animateTextChange('phone', user.phone || 'Nu specificat');
-    animateTextChange('created-at', formatDate(user.createdAt));
-    
-    // Update user status
-    const userStatus = document.getElementById('user-status');
-    if (userStatus) {
-        userStatus.textContent = 'Activ';
-        userStatus.style.color = '#10b981';
-    }
-    
-    // Update member since
-    animateTextChange('member-since-header', formatDate(user.createdAt));
-    
-    // Update rating (mock data for now)
-    animateTextChange('rating-header', '5.0');
-    
-    // Show appropriate sections based on profile type
-    document.getElementById('quick-actions-section').style.display = 'block';
-    document.getElementById('view-profile-actions-section').style.display = 'none';
-    document.getElementById('rides-section-title').textContent = 'Călătoriile mele';
 }
 
 function animateTextChange(elementId, newText) {
+    console.log('🔤 animateTextChange called for elementId:', elementId, 'with text:', newText);
+    
     const element = document.getElementById(elementId);
-    if (!element) return;
+    if (!element) {
+        console.error('❌ Element not found:', elementId);
+        return;
+    }
+    
+    console.log('✅ Element found:', element);
     
     element.style.opacity = '0';
     setTimeout(() => {
         element.textContent = newText;
         element.style.opacity = '1';
+        console.log('✅ Text updated for:', elementId);
     }, 150);
 }
 
-function displayUserRides(rides) {
+function displayUserRides(rides, isOwnRides) {
     const ridesList = document.getElementById('user-rides-list');
     const noRides = document.getElementById('no-rides');
     const noRidesTitle = document.getElementById('no-rides-title');
@@ -295,9 +439,15 @@ function displayUserRides(rides) {
     
     if (!rides || rides.length === 0) {
         showNoRides();
-        if (noRidesTitle) noRidesTitle.textContent = 'Nu ai încă călătorii';
-        if (noRidesDescription) noRidesDescription.textContent = 'Începe să creezi călătorii pentru a le vedea aici';
-        if (addFirstRideBtn) addFirstRideBtn.style.display = 'inline-flex';
+        if (noRidesTitle) {
+            noRidesTitle.textContent = isOwnRides ? 'Nu ai încă călătorii' : 'Nu are încă călătorii';
+        }
+        if (noRidesDescription) {
+            noRidesDescription.textContent = isOwnRides ? 'Începe să creezi călătorii pentru a le vedea aici' : 'Acest utilizator nu a creat încă nicio călătorie';
+        }
+        if (addFirstRideBtn) {
+            addFirstRideBtn.style.display = isOwnRides ? 'inline-flex' : 'none';
+        }
         return;
     }
     
@@ -306,7 +456,7 @@ function displayUserRides(rides) {
     noRides.style.display = 'none';
     
     rides.forEach((ride, index) => {
-        const rideElement = createRideElement(ride);
+        const rideElement = createRideElement(ride, isOwnRides);
         rideElement.style.opacity = '0';
         rideElement.style.transform = 'translateY(10px)';
         ridesList.appendChild(rideElement);
@@ -320,7 +470,7 @@ function displayUserRides(rides) {
     });
 }
 
-function createRideElement(ride) {
+function createRideElement(ride, isOwnRides) {
     const rideElement = document.createElement('div');
     rideElement.className = 'user-ride-item';
     
@@ -382,7 +532,7 @@ function createRideElement(ride) {
                 <i class="fas fa-eye"></i>
                 Vezi detalii
             </button>
-            ${ride.isActive ? `
+            ${ride.isActive && isOwnRides ? `
                 <button class="btn btn-secondary btn-small" onclick="editRide(${ride.id})">
                     <i class="fas fa-edit"></i>
                     Editează
@@ -512,12 +662,18 @@ function switchTab(tabType) {
     // Show/hide no rides message
     if (visibleRides === 0) {
         noRides.style.display = 'block';
+        
+        // Verificăm dacă suntem pe profilul propriu sau al altui utilizator
+        const pathSegments = window.location.pathname.split('/');
+        const targetUserId = pathSegments.length > 2 && pathSegments[1] === 'profile' ? pathSegments[2] : null;
+        const isOwnProfile = !targetUserId || targetUserId === 'edit-profile';
+        
         if (tabType === 'active') {
-            noRidesTitle.textContent = 'Nu ai curse active';
-            noRidesDescription.textContent = 'Creează o cursă pentru a o vedea aici';
+            noRidesTitle.textContent = isOwnProfile ? 'Nu ai curse active' : 'Nu are curse active';
+            noRidesDescription.textContent = isOwnProfile ? 'Creează o cursă pentru a o vedea aici' : 'Acest utilizator nu are curse active momentan';
         } else {
-            noRidesTitle.textContent = 'Nu ai curse completate';
-            noRidesDescription.textContent = 'Cursele completate vor apărea aici';
+            noRidesTitle.textContent = isOwnProfile ? 'Nu ai curse completate' : 'Nu are curse completate';
+            noRidesDescription.textContent = isOwnProfile ? 'Cursele completate vor apărea aici' : 'Acest utilizator nu are curse completate momentan';
         }
     } else {
         noRides.style.display = 'none';
@@ -595,7 +751,15 @@ function deleteRide(rideId) {
         .then(response => {
             if (response.ok) {
                 showNotification('Cursa a fost ștearsă cu succes!', 'success');
-                loadUserRides(); // Reload rides
+                // Reload rides - verificăm dacă suntem pe profilul propriu
+                const pathSegments = window.location.pathname.split('/');
+                const targetUserId = pathSegments.length > 2 && pathSegments[1] === 'profile' ? pathSegments[2] : null;
+                
+                if (!targetUserId || targetUserId === 'edit-profile') {
+                    loadUserRides(); // Reload rides pentru profilul propriu
+                } else {
+                    loadSpecificUserRides(targetUserId); // Reload rides pentru profilul specific
+                }
             } else {
                 showNotification('Eroare la ștergerea cursei!', 'error');
             }
@@ -605,4 +769,384 @@ function deleteRide(rideId) {
             showNotification('Eroare la ștergerea cursei!', 'error');
         });
     }
+}
+
+// Rating System Functions
+function initializeRatingSystem() {
+    // Setup rating form event listeners
+    const submitRatingBtn = document.getElementById('submit-rating-btn');
+    if (submitRatingBtn) {
+        submitRatingBtn.addEventListener('click', submitRating);
+    }
+    
+    // Setup rating update event listeners
+    const editRatingBtn = document.getElementById('edit-rating-btn');
+    const deleteRatingBtn = document.getElementById('delete-rating-btn');
+    
+    if (editRatingBtn) {
+        editRatingBtn.addEventListener('click', editRating);
+    }
+    
+    if (deleteRatingBtn) {
+        deleteRatingBtn.addEventListener('click', deleteRating);
+    }
+    
+    // Setup star rating hover effects
+    setupStarRatingEffects();
+}
+
+function setupStarRatingEffects() {
+    const starLabels = document.querySelectorAll('.star-label');
+    
+    starLabels.forEach((label, index) => {
+        label.addEventListener('mouseenter', function() {
+            // Highlight stars from current to first
+            for (let i = 0; i <= index; i++) {
+                starLabels[i].style.color = '#fbbf24';
+            }
+        });
+        
+        label.addEventListener('mouseleave', function() {
+            // Reset all stars to default color, but keep selected rating
+            const selectedRating = document.querySelector('input[name="rating"]:checked');
+            if (selectedRating) {
+                const ratingValue = parseInt(selectedRating.value);
+                starLabels.forEach((star, i) => {
+                    if (i < ratingValue) {
+                        star.style.color = '#fbbf24';
+                    } else {
+                        star.style.color = '#d1d5db';
+                    }
+                });
+            } else {
+                starLabels.forEach(star => {
+                    star.style.color = '#d1d5db';
+                });
+            }
+        });
+        
+        // Add click event to select rating
+        label.addEventListener('click', function() {
+            const ratingValue = index + 1;
+            const radioInput = document.getElementById(`star${ratingValue}`);
+            
+            // Uncheck all radio inputs
+            document.querySelectorAll('input[name="rating"]').forEach(input => {
+                input.checked = false;
+            });
+            
+            // Check the selected rating
+            radioInput.checked = true;
+            
+            // Update star colors to show selected rating
+            starLabels.forEach((star, i) => {
+                if (i < ratingValue) {
+                    star.style.color = '#fbbf24';
+                } else {
+                    star.style.color = '#d1d5db';
+                }
+            });
+        });
+    });
+}
+
+function loadUserRatingData(userId) {
+    // Load rating summary
+    fetch(`/api/ratings/user/${userId}`)
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Failed to load rating data');
+            }
+        })
+        .then(data => {
+            if (data.success) {
+                const averageRating = data.averageRating || 0;
+                const totalRatings = data.totalRatings || 0;
+                updateRatingDisplay(averageRating, totalRatings);
+                displayUserRatings(data.ratings);
+            } else {
+                // Set default values if no rating data
+                updateRatingDisplay(0, 0);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading rating data:', error);
+            // Set default values on error
+            updateRatingDisplay(0, 0);
+        });
+    
+    // Check if current user has already rated this user
+    checkCurrentUserRating(userId);
+}
+
+function updateRatingDisplay(averageRating, totalRatings) {
+    const currentRating = document.getElementById('current-rating');
+    const ratingCount = document.getElementById('rating-count');
+    const starsDisplay = document.getElementById('stars-display');
+    
+    if (currentRating) {
+        currentRating.textContent = averageRating.toFixed(1);
+    }
+    
+    if (ratingCount) {
+        if (totalRatings === 0) {
+            ratingCount.textContent = '0 rating-uri';
+        } else {
+            ratingCount.textContent = `${totalRatings} rating${totalRatings !== 1 ? '-uri' : ''}`;
+        }
+    }
+    
+    if (starsDisplay) {
+        updateStarsDisplay(starsDisplay, averageRating);
+    }
+}
+
+function updateStarsDisplay(starsContainer, rating) {
+    const stars = starsContainer.querySelectorAll('i');
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    
+    stars.forEach((star, index) => {
+        if (rating === 0) {
+            // No rating - show empty stars
+            star.className = 'far fa-star';
+            star.style.color = '#d1d5db';
+        } else if (index < fullStars) {
+            // Full star
+            star.className = 'fas fa-star';
+            star.style.color = '#fbbf24';
+        } else if (index === fullStars && hasHalfStar) {
+            // Half star
+            star.className = 'fas fa-star-half-alt';
+            star.style.color = '#fbbf24';
+        } else {
+            // Empty star
+            star.className = 'far fa-star';
+            star.style.color = '#d1d5db';
+        }
+    });
+}
+
+function displayUserRatings(ratings) {
+    // This function can be expanded to show individual ratings
+    // For now, we just use the summary data
+    console.log('User ratings loaded:', ratings);
+}
+
+function checkCurrentUserRating(ratedUserId) {
+    fetch(`/api/ratings/check/${ratedUserId}`)
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Failed to check rating');
+            }
+        })
+        .then(data => {
+            if (data.success) {
+                if (data.hasRated) {
+                    showRatingUpdate(data.existingRating);
+                } else {
+                    showRatingForm();
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error checking rating:', error);
+            showRatingForm();
+        });
+}
+
+function showRatingForm() {
+    const ratingForm = document.getElementById('rating-form');
+    const ratingUpdate = document.getElementById('rating-update');
+    
+    if (ratingForm) ratingForm.style.display = 'block';
+    if (ratingUpdate) ratingUpdate.style.display = 'none';
+    
+    // Reset rating form
+    document.getElementById('rating-comment').value = '';
+    document.querySelectorAll('input[name="rating"]').forEach(input => {
+        input.checked = false;
+    });
+    
+    // Reset star colors
+    const starLabels = document.querySelectorAll('.star-label');
+    starLabels.forEach(star => {
+        star.style.color = '#d1d5db';
+    });
+}
+
+function showRatingUpdate(existingRating) {
+    const ratingForm = document.getElementById('rating-form');
+    const ratingUpdate = document.getElementById('rating-update');
+    const userRatingStars = document.getElementById('user-rating-stars');
+    const userRatingComment = document.getElementById('user-rating-comment');
+    
+    if (ratingForm) ratingForm.style.display = 'none';
+    if (ratingUpdate) ratingUpdate.style.display = 'block';
+    
+    // Display user's existing rating
+    if (userRatingStars && existingRating) {
+        userRatingStars.innerHTML = '';
+        for (let i = 1; i <= 5; i++) {
+            const star = document.createElement('i');
+            if (i <= existingRating.rating) {
+                star.className = 'fas fa-star';
+                star.style.color = '#fbbf24';
+            } else {
+                star.className = 'far fa-star';
+                star.style.color = '#d1d5db';
+            }
+            userRatingStars.appendChild(star);
+        }
+    }
+    
+    if (userRatingComment) {
+        if (existingRating && existingRating.comment && existingRating.comment.trim()) {
+            userRatingComment.textContent = existingRating.comment;
+        } else {
+            userRatingComment.textContent = 'Nu a fost adăugat niciun comentariu.';
+        }
+    }
+}
+
+function submitRating() {
+    // Get rating value
+    const ratingInput = document.querySelector('input[name="rating"]:checked');
+    if (!ratingInput) {
+        showNotification('Te rog să selectezi un rating!', 'error');
+        return;
+    }
+    
+    const rating = parseInt(ratingInput.value);
+    const comment = document.getElementById('rating-comment').value;
+    
+    // Get the user ID from the URL
+    const pathSegments = window.location.pathname.split('/');
+    const ratedUserId = pathSegments.length > 2 && pathSegments[1] === 'profile' ? pathSegments[2] : null;
+    
+    if (!ratedUserId) {
+        showNotification('Eroare: ID utilizator invalid!', 'error');
+        return;
+    }
+    
+    // Submit rating
+    const formData = new FormData();
+    formData.append('ratedUserId', ratedUserId);
+    formData.append('rating', rating);
+    if (comment.trim()) {
+        formData.append('comment', comment.trim());
+    }
+    
+    fetch('/api/ratings/rate', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new Error('Failed to submit rating');
+        }
+    })
+    .then(data => {
+        if (data.success) {
+            showNotification('Rating-ul a fost salvat cu succes!', 'success');
+            // Reload rating data
+            loadUserRatingData(ratedUserId);
+            // Reset form
+            document.getElementById('rating-comment').value = '';
+            document.querySelectorAll('input[name="rating"]').forEach(input => input.checked = false);
+            
+            // Reset star colors
+            const starLabels = document.querySelectorAll('.star-label');
+            starLabels.forEach(star => {
+                star.style.color = '#d1d5db';
+            });
+        } else {
+            showNotification(data.message || 'Eroare la salvarea rating-ului!', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error submitting rating:', error);
+        showNotification('Eroare la salvarea rating-ului!', 'error');
+    });
+}
+
+function editRating() {
+    // Show rating form for editing
+    showRatingForm();
+    
+    // Get existing rating data
+    const pathSegments = window.location.pathname.split('/');
+    const ratedUserId = pathSegments.length > 2 && pathSegments[1] === 'profile' ? pathSegments[2] : null;
+    
+    if (ratedUserId) {
+        checkCurrentUserRating(ratedUserId);
+    }
+    
+    // Reset star colors
+    const starLabels = document.querySelectorAll('.star-label');
+    starLabels.forEach(star => {
+        star.style.color = '#d1d5db';
+    });
+}
+
+function deleteRating() {
+    if (!confirm('Ești sigur că vrei să ștergi rating-ul tău?')) {
+        return;
+    }
+    
+    // Get the user ID from the URL
+    const pathSegments = window.location.pathname.split('/');
+    const ratedUserId = pathSegments.length > 2 && pathSegments[1] === 'profile' ? pathSegments[2] : null;
+    
+    if (!ratedUserId) {
+        showNotification('Eroare: ID utilizator invalid!', 'error');
+        return;
+    }
+    
+    // Get existing rating to delete
+    fetch(`/api/ratings/check/${ratedUserId}`)
+        .then(data => {
+            if (data.success && data.hasRated && data.existingRating) {
+                return fetch(`/api/ratings/${data.existingRating.id}`, {
+                    method: 'DELETE'
+                });
+            } else {
+                throw new Error('Rating not found');
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Failed to delete rating');
+            }
+        })
+        .then(data => {
+            if (data.success) {
+                showNotification('Rating-ul a fost șters cu succes!', 'success');
+                // Reload rating data
+                loadUserRatingData(ratedUserId);
+                // Reset form
+                document.getElementById('rating-comment').value = '';
+                document.querySelectorAll('input[name="rating"]').forEach(input => input.checked = false);
+                
+                // Reset star colors
+                const starLabels = document.querySelectorAll('.star-label');
+                starLabels.forEach(star => {
+                    star.style.color = '#d1d5db';
+                });
+            } else {
+                showNotification(data.message || 'Eroare la ștergerea rating-ului!', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting rating:', error);
+            showNotification('Eroare la ștergerea rating-ului!', 'error');
+        });
 }

@@ -65,10 +65,16 @@ function initializeRideActions() {
         }
         
         if (e.target.closest('.user-profile-link')) {
+            console.log('✅ Click on user profile link detected in rides.js!');
             const link = e.target.closest('.user-profile-link');
             const userId = link.getAttribute('data-user-id');
+            console.log('👤 User ID extracted in rides.js:', userId);
+            
             if (userId) {
+                console.log('🚀 Navigating to user profile from rides.js:', userId);
                 navigateToUserProfile(userId);
+            } else {
+                console.error('❌ No user ID found in rides.js');
             }
         }
     });
@@ -123,9 +129,14 @@ function showRideDetails(rideId) {
 
 // Navigarea la profilul utilizatorului
 function navigateToUserProfile(userId) {
+    console.log('🧭 navigateToUserProfile called in rides.js with userId:', userId);
+    
     if (userId) {
-        window.location.href = `/profile/${userId}`;
+        const profileUrl = `/profile/${userId}`;
+        console.log('🌐 Redirecting to profile from rides.js:', profileUrl);
+        window.location.href = profileUrl;
     } else {
+        console.error('❌ User ID is missing for profile navigation in rides.js.');
         showNotification('Eroare: ID-ul utilizatorului nu a fost găsit.', 'error');
     }
 }
@@ -245,7 +256,7 @@ function generateRideCardHTML(ride) {
                         <i class="fas fa-users"></i>
                         <span>${ride.availableSeats} locuri disponibile</span>
                     </div>
-                    <div class="info-item user-profile-link" data-user-id="${ride.userId}" style="cursor: pointer;" onclick="navigateToUserProfile('${ride.userId}')">
+                    <div class="info-item user-profile-link" data-user-id="${ride.userId}" style="cursor: pointer;">
                         <i class="fas fa-user"></i>
                         <span class="driver-name">${ride.driverName}</span>
                         <i class="fas fa-external-link-alt profile-link-icon"></i>

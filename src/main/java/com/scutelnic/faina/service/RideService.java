@@ -195,8 +195,8 @@ public class RideService {
         }
         
         User user = ride.getUser();
-        if (user == null) {
-            // Dacă user-ul este null, returnăm un DTO cu informații minime
+        if (user == null || user.getId() == null) {
+            // Dacă user-ul este null sau nu are ID, returnăm un DTO cu informații minime
             return new RideDTO(
                 ride.getId(),
                 ride.getFromLocation(),
@@ -206,7 +206,7 @@ public class RideService {
                 ride.getAvailableSeats(),
                 ride.getPrice(),
                 ride.getDescription(),
-                null,
+                0L, // ID-ul utilizatorului nu poate fi 0, deci nu va fi clickabil
                 "Utilizator necunoscut",
                 "N/A",
                 "N/A",

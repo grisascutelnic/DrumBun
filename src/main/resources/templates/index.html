@@ -106,7 +106,7 @@
                                     <i class="fas fa-users"></i>
                                     <span th:text="${ride.availableSeats + ' locuri disponibile'}">Locuri</span>
                                 </div>
-                                <div class="info-item user-profile-link" th:data-user-id="${ride.userId}" style="cursor: pointer;" onclick="navigateToUserProfile(this.getAttribute('data-user-id'))">
+                                <div class="info-item user-profile-link" th:data-user-id="${ride.userId}" style="cursor: pointer;" th:onclick="${ride.userId != null and ride.userId > 0} ? 'navigateToUserProfile(' + ${ride.userId} + ')' : 'void(0)'" th:style="${ride.userId != null and ride.userId > 0} ? 'cursor: pointer;' : 'cursor: default;'">
                                     <i class="fas fa-user"></i>
                                     <span th:text="${ride.driverName}" class="driver-name">Șofer</span>
                                     <i class="fas fa-external-link-alt profile-link-icon"></i>
@@ -190,9 +190,9 @@
     <div th:replace="~{fragments/footer :: footer}"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="script.js"></script>
+    <script src="/script.js"></script>
     <script src="/autocomplete.js"></script>
-    <script src="navbar.js"></script>
+    <script src="/navbar.js"></script>
     <script>
         // Force CSS reload to prevent caching issues
         (function() {
@@ -240,10 +240,10 @@
 
         // Funcție pentru navigarea către profilul utilizatorului
         function navigateToUserProfile(userId) {
-            if (userId) {
+            if (userId && userId > 0) {
                 window.location.href = `/profile/${userId}`;
             } else {
-                console.error('User ID is missing');
+                console.error('User ID is missing or invalid');
             }
         }
     </script>
